@@ -9,6 +9,7 @@ using static Violet.Utilities.Variables;
 
 using static Violet.Mods.Advantage;
 using static Violet.Mods.Overpowered;
+using static Violet.Mods.Master;
 
 using UnityEngine;
 using VioletPaid.Menu;
@@ -100,9 +101,16 @@ namespace Violet.Menu
             // Overpowered
             new Button("Master", Category.Overpowered, false, false, () => ChangePage(Category.Master)),
             new Button("Scitzo Gun", Category.Overpowered, true, false, () => ScitzoGun()),
+            new Button("Reverse Scitzo Gun", Category.Overpowered, true, false, () => ReverseScitzoGun()),
 
             // Master
             new Button("Back", Category.Master, false, false, () => ChangePage(Category.Overpowered)),
+            new Button("Zero Gravity All", Category.Master, true, false, () => ZeroGravityAll(true), ()=> ZeroGravityAll(false)),
+            new Button("Zero Gravity Others", Category.Master, true, false, () => ZeroGravityOthers()),
+            new Button("Zero Gravity Gun", Category.Master, true, false, () => ZeroGravityGun()),
+            new Button("Grey Screen All", Category.Master, true, false, () => GreyScreenAll(), ()=> ZeroGravityAll(false)),
+            new Button("Grey Screen Others", Category.Master, true, false, () => GreyScreenOthers()),
+            new Button("Grey Screen Gun", Category.Master, true, false, () => GreyScreenGun()),
            
             // SoundBoard Category
             new Button("Play Alarm", Category.SoundBoard, false, false, () => AudioManager.PlaySoundThroughMicrophone(AudioManager.LoadSoundFromURL("https://raw.githubusercontent.com/TortiseWay2Cool/SoundBoard/main/alarm!!!-made-with-Voicemod.mp3", "alarm!!!-made-with-Voicemod.mp3"), false)),

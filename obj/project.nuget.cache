@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "iMFi0BTLBbM=",
+  "dgSpecHash": "MW4z2KDK9jY=",
   "success": true,
-  "projectFilePath": "C:\\Users\\gradd\\OneDrive\\Desktop\\Violet\\Violet.csproj",
+  "projectFilePath": "C:\\Users\\gradd\\OneDrive\\Desktop\\Violet\\Violet\\Violet.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\gradd\\.nuget\\packages\\assemblypublicizer\\1.0.2\\assemblypublicizer.1.0.2.nupkg.sha512",
     "C:\\Users\\gradd\\.nuget\\packages\\bepinex.assemblypublicizer.msbuild\\0.4.3\\bepinex.assemblypublicizer.msbuild.0.4.3.nupkg.sha512",

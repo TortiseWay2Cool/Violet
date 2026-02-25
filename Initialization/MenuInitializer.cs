@@ -6,7 +6,7 @@ using UnityEngine;
 using Violet.Menu;
 using Violet.Utilities;
 using VioletPaid.Initialization;
-using VioletPaid.Menu;
+using Violet.GUI;
 using VioletPaid.Utilities;
 
 namespace Violet.Initialization
@@ -24,7 +24,7 @@ namespace Violet.Initialization
                 if (menuObject != null) return;
                     menuObject = new GameObject(PluginInfo.menuName);
                     menuObject.AddComponent<Main>();
-                    menuObject.AddComponent<Gui>();
+                    menuObject.AddComponent<VioletGUI>();
                     GameObject.DontDestroyOnLoad(menuObject);
                 
             }

@@ -12,7 +12,7 @@ using static Violet.Mods.Overpowered;
 using static Violet.Mods.Master;
 
 using UnityEngine;
-using VioletPaid.Menu;
+using Violet.GUI;
 
 namespace Violet.Menu
 {
@@ -64,12 +64,13 @@ namespace Violet.Menu
             
             //menu settings
             new Button("Right-Handed Menu", Category.MenuSettings, true, false, () => rightHandedMenu = false, () => rightHandedMenu = true),
-            new Button("Disable Array List", Category.MenuSettings, true, true, () => Gui.ArrayListShown = true, () => Gui.ArrayListShown = false),
-            new Button("Toggle Disconect Button", Category.MenuSettings, true, true, () => toggledisconnectButton = true, ()=> toggledisconnectButton = false),
-            new Button("Toggle Player Catagorys", Category.MenuSettings, true, true, () => SideCatagorys = true, () => SideCatagorys = false),
-            new Button("Toggle Player Tabs", Category.MenuSettings, true, true, () => Variables.PlayerTab = true, ()=> Variables.PlayerTab = false),
-            new Button("Toggle Rigidbdy", Category.MenuSettings, true, true, () => Variables.Rigidbody = true, ()=> Variables.Rigidbody = false),
-            new Button("Toggle Gravity", Category.MenuSettings, true, true, () => Variables.gravity = true, ()=> Variables.gravity = false),
+            new Button("Custom Boards", Category.MenuSettings, true, true, () => Main.Board()), // Adding this Later
+            new Button("Disable Array List", Category.MenuSettings, true, false, () => VioletGUI.guiEnabled = true, () => VioletGUI.guiEnabled = false),
+            new Button("Toggle Disconect Button", Category.MenuSettings, true, false, () => toggledisconnectButton = true, ()=> toggledisconnectButton = false),
+            new Button("Toggle Player Catagorys", Category.MenuSettings, true, false, () => SideCatagorys = true, () => SideCatagorys = false),
+            new Button("Toggle Player Tabs", Category.MenuSettings, true, false, () => Variables.PlayerTab = true, ()=> Variables.PlayerTab = false),
+            new Button("Toggle Rigidbdy", Category.MenuSettings, true, false, () => Variables.Rigidbody = true, ()=> Variables.Rigidbody = false),
+            new Button("Toggle Gravity", Category.MenuSettings, true, false, () => Variables.gravity = true, ()=> Variables.gravity = false),
             new Button("Current Menu Theme []", Category.MenuSettings, false, false, ()=> Main.ChangeTheme()),
             new Button("Current Menu Outline []", Category.MenuSettings, false, false, ()=> Main.ChangeOutlineColor()),
             new Button("Current Menu Sound", Category.MenuSettings, false, false, ()=> Main.ChangeSound()),

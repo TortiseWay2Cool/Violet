@@ -3,6 +3,7 @@ using HarmonyLib;
 using Photon.Pun;
 using Photon.Realtime;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,16 +12,17 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using Violet.GUI;
 using Violet.Initialization;
 using Violet.Menu;
 using Violet.Utilities;
 using VioletPaid.Utilities;
-using static VioletPaid.Initialization.PluginInfo;
 using static Violet.Menu.ButtonHandler;
 using static Violet.Menu.Main;
 using static Violet.Menu.Optimizations;
 using static Violet.Utilities.ColorLib;
 using static Violet.Utilities.Variables;
+using static VioletPaid.Initialization.PluginInfo;
 
 namespace Violet.Menu
 {
@@ -139,9 +141,15 @@ namespace Violet.Menu
             }
         }
 
+        public static IEnumerator StartMenuDelayed()
+        {
+            yield return new WaitForSeconds(0.1f);
+            VioletGUI.StartMenu();
+        }
         public void Awake()
         {
             ResourceLoader.LoadResources();
+            StartCoroutine(StartMenuDelayed());
             Board();
             taggerInstance = GorillaTagger.Instance;
             playerInstance = GorillaLocomotion.GTPlayer.Instance;
@@ -216,7 +224,7 @@ namespace Violet.Menu
         private static Material originalMat2;
         private static Material originalMat3;
         private static Color32 _cachedRgbColor;
-        private static void Board()
+        public static void Board()
         {
             try
             {

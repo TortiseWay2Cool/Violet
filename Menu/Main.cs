@@ -28,6 +28,7 @@ namespace Violet.Menu
 {
     public class Main : MonoBehaviour
     {
+        // If you see this, it worked.
         private static Material colorMaterial;
         private static bool isPCMenuOpen;
         private static bool isInPcCondition;

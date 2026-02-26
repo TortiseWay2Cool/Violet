@@ -28,7 +28,8 @@ namespace Violet.Menu
 {
     public class Main : MonoBehaviour
     {
-        // If you see this, it worked.
+        private const string ConfigFilePath = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Gorilla Tag\\output.txt";
+
         private static Material colorMaterial;
         private static bool isPCMenuOpen;
         private static bool isInPcCondition;
@@ -38,19 +39,28 @@ namespace Violet.Menu
 
         public void Update()
         {
-            if (NotificationLib.Instance != null)
-            {
-                NotificationLib.Instance.UpdateNotifications();
-            }
+            UpdateNotificationsAndButtons();
+            HandleInput();
+        }
 
-            foreach (var button in ModButtons.buttons)
+        private void UpdateNotificationsAndButtons()
+        {
+            NotificationLib.Instance?.UpdateNotifications();
+
+            if (ModButtons.buttons != null)
             {
-                if (button.Enabled && button.onEnable != null)
+                foreach (var button in ModButtons.buttons)
                 {
-                    button.onEnable.Invoke();
+                    if (button.Enabled && button.onEnable != null)
+                    {
+                        button.onEnable.Invoke();
+                    }
                 }
             }
+        }
 
+        private void HandleInput()
+        {
             if (UnityInput.Current.GetKeyDown(PCMenuKey))
             {
                 isPCMenuOpen = !isPCMenuOpen;
@@ -62,8 +72,28 @@ namespace Violet.Menu
 
             if (isPCMenuOpen && !isInMenuCondition && !pollerInstance.leftControllerPrimaryButton && !pollerInstance.rightControllerPrimaryButton && !openMenu)
             {
-                isInPcCondition = true;
-                cm?.SetActive(false);
+                EnterPcMenuMode();
+                HandlePcMenuInteraction();
+            }
+            else if (menuObj != null && isInPcCondition)
+            {
+                ExitPcMenuMode();
+            }
+
+            if (openMenu && !isInPcCondition)
+            {
+                EnterControllerMenuMode();
+            }
+            else if (menuObj != null && isInMenuCondition)
+            {
+                ExitControllerMenuMode();
+            }
+        }
+
+        private void EnterPcMenuMode()
+        {
+            isInPcCondition = true;
+            cm?.SetActive(false);
 
             if (menuObj == null)
             {
@@ -76,69 +106,76 @@ namespace Violet.Menu
                 PositionMenuForKeyboard();
                 AddTitleAndFPSCounter();
             }
-  
-                if (Mouse.current.leftButton.isPressed)
+        }
+
+        private void HandlePcMenuInteraction()
+        {
+            if (Mouse.current.leftButton.isPressed)
+            {
+                if (thirdPersonCamera == null) return;
+
+                Ray ray = thirdPersonCamera.GetComponent<Camera>().ScreenPointToRay(Mouse.current.position.ReadValue());
+                if (Physics.Raycast(ray, out RaycastHit hit))
                 {
-                    Ray ray = thirdPersonCamera.GetComponent<Camera>().ScreenPointToRay(Mouse.current.position.ReadValue());
-                    if (Physics.Raycast(ray, out RaycastHit hit))
+                    var btnCollider = hit.collider?.GetComponent<BtnCollider>();
+                    if (btnCollider != null && clickerObj != null)
                     {
-                        var btnCollider = hit.collider?.GetComponent<BtnCollider>();
-                        if (btnCollider != null && clickerObj != null)
-                        {
-                            btnCollider.OnTriggerEnter(clickerObj.GetComponent<Collider>());
-                        }
+                        btnCollider.OnTriggerEnter(clickerObj.GetComponent<Collider>());
                     }
                 }
-                else if (clickerObj != null)
-                {
-                    DestroyObject(clickerObj);
-                }
             }
-            else if (menuObj != null && isInPcCondition)
+            else if (clickerObj != null)
             {
-                isInPcCondition = false;
+                DestroyObject(clickerObj);
+            }
+        }
+
+        private void ExitPcMenuMode()
+        {
+            isInPcCondition = false;
+            CleanupMenu(0);
+            cm?.SetActive(true);
+        }
+
+        private void EnterControllerMenuMode()
+        {
+            isInMenuCondition = true;
+
+            if (menuObj == null)
+            {
+                Draw();
+                AddRigidbodyToMenu();
+                AddButtonClicker(rightHandedMenu ? taggerInstance.leftHandTransform : taggerInstance.rightHandTransform);
+            }
+            else
+            {
+                AddTitleAndFPSCounter();
+                PositionMenuForHand();
+            }
+        }
+
+        private void ExitControllerMenuMode()
+        {
+            isInMenuCondition = false;
+            if (Variables.Rigidbody)
+            {
+                AddRigidbodyToMenu();
+
+                Vector3 currentVelocity = rightHandedMenu
+                    ? playerInstance.GetHandVelocityTracker(false).GetAverageVelocity(true, 0f, false)
+                    : playerInstance.GetHandVelocityTracker(true).GetAverageVelocity(true, 0f, false);
+
+                if (Vector3.Distance(currentVelocity, previousVelocity) > velocityThreshold)
+                {
+                    currentMenuRigidbody.velocity = currentVelocity;
+                    previousVelocity = currentVelocity;
+                }
+
+                CleanupMenu(1);
+            }
+            else
+            {
                 CleanupMenu(0);
-                cm?.SetActive(true);
-            }
-
-            if (openMenu && !isInPcCondition)
-            {
-                isInMenuCondition = true;
-
-                if (menuObj == null)
-                {
-                    Draw();
-                    AddRigidbodyToMenu();
-                    AddButtonClicker(rightHandedMenu ? taggerInstance.leftHandTransform : taggerInstance.rightHandTransform);
-                }
-                else
-                {
-                    AddTitleAndFPSCounter();
-                    PositionMenuForHand();
-                }
-            }
-            else if (menuObj != null && isInMenuCondition)
-            {
-                isInMenuCondition = false;
-                if (Variables.Rigidbody)
-                {
-                    AddRigidbodyToMenu();
-                    Vector3 currentVelocity = rightHandedMenu
-                        ? playerInstance.GetHandVelocityTracker(false).GetAverageVelocity(true, 0f, false)
-                        : playerInstance.GetHandVelocityTracker(true).GetAverageVelocity(true, 0f, false);
-
-                    if (Vector3.Distance(currentVelocity, previousVelocity) > velocityThreshold)
-                    {
-                        currentMenuRigidbody.velocity = currentVelocity;
-                        previousVelocity = currentVelocity;
-                    }
-
-                    CleanupMenu(1);
-                }
-                else
-                {
-                    CleanupMenu(0);
-                }
             }
         }
 
@@ -147,6 +184,7 @@ namespace Violet.Menu
             yield return new WaitForSeconds(0.1f);
             VioletGUI.StartMenu();
         }
+
         public void Awake()
         {
             ResourceLoader.LoadResources();
@@ -161,63 +199,78 @@ namespace Violet.Menu
 
         public static void SaveConfigs()
         {
-            List<string> enabledButtonTexts = new List<string>();
-            foreach (var button in ModButtons.buttons)
-            {
-                if (button.Enabled)
-                {
-                    enabledButtonTexts.Add(button.buttonText);
-                }
-  
-            }
+            if (ModButtons.buttons == null) return;
 
-            SaveStringArrayToFile(enabledButtonTexts.ToArray());
+            var enabledButtonTexts = ModButtons.buttons
+                .Where(b => b.Enabled)
+                .Select(b => b.buttonText)
+                .ToArray();
 
+            SaveStringArrayToFile(enabledButtonTexts);
         }
 
         public static void SaveStringArrayToFile(string[] data)
         {
-            File.WriteAllLines("C:\\Program Files (x86)\\Steam\\steamapps\\common\\Gorilla Tag\\output.txt", data);
+            try
+            {
+                File.WriteAllLines(ConfigFilePath, data ?? Array.Empty<string>());
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Failed to save config file: {ex.Message}");
+            }
         }
 
         public static void LoadConfigs()
         {
-            if (File.Exists("C:\\Program Files (x86)\\Steam\\steamapps\\common\\Gorilla Tag\\output.txt"))
+            try
             {
-                string[] contents = File.ReadAllLines("C:\\Program Files (x86)\\Steam\\steamapps\\common\\Gorilla Tag\\output.txt");
-                for (int i = 0; i < contents.Length; i++)
+                if (!File.Exists(ConfigFilePath)) return;
+
+                string[] contents = File.ReadAllLines(ConfigFilePath);
+                if (contents == null || contents.Length == 0) return;
+
+                foreach (var button in ModButtons.buttons)
                 {
-                    foreach (var button in ModButtons.buttons)
+                    if (contents.Contains(button.buttonText))
                     {
                         if (!button.Enabled)
                         {
-                            if (contents.Contains(button.buttonText))
-                            {
-                                button.Enabled = true;
-                                button.onEnable?.Invoke();
-                            }
+                            button.Enabled = true;
+                            button.onEnable?.Invoke();
                         }
-                        else
+                    }
+                    else
+                    {
+                        if (button.Enabled)
                         {
                             button.Enabled = false;
                             button.onDisable?.Invoke();
                         }
-
-                        
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Failed to load config file: {ex.Message}");
             }
         }
 
         public static bool TargetPlrTagger;
         public static string PlayerInfo
-        { 
+        {
             get
             {
-                StringBuilder info = new StringBuilder();
-                foreach (var player in PhotonNetwork.PlayerList) 
-                { string masterTag = player.IsMasterClient ? " (Master)" : "";
-                    info.AppendLine($"{player.NickName} (Actor: {player.ActorNumber}){masterTag} (FPS: {RigManager.GetVRRigFromPlayer(player).fps})"); } return info.ToString(); 
+                var info = new StringBuilder();
+                foreach (var player in PhotonNetwork.PlayerList)
+                {
+                    string masterTag = player.IsMasterClient ? " (Master)" : string.Empty;
+                    var rig = RigManager.GetVRRigFromPlayer(player);
+                    int fps = rig != null ? rig.fps : 0;
+                    info.AppendLine($"{player.NickName} (Actor: {player.ActorNumber}){masterTag} (FPS: {fps})");
+                }
+
+                return info.ToString();
             }
         }
 
@@ -225,86 +278,158 @@ namespace Violet.Menu
         private static Material originalMat2;
         private static Material originalMat3;
         private static Color32 _cachedRgbColor;
+
         public static void Board()
         {
             try
             {
                 Color32 BoardColor = Color.violet;
 
-                Material colorMaterial = new Material(Shader.Find("GorillaTag/UberShader"))
-                {
-                    color = ButtonColorOff
-                };
+                colorMaterial ??= new Material(Shader.Find("GorillaTag/UberShader"));
+                colorMaterial.color = ButtonColorOff;
                 colorMaterial.SetFloat("_Mode", 2f);
 
-                Material mat = new Material(Shader.Find("GorillaTag/UberShader"))
+                var mat = new Material(Shader.Find("GorillaTag/UberShader")) { color = colorMaterial.color };
+
+                var wallMonitorPath = "Environment Objects/LocalObjects_Prefab/TreeRoom/TreeRoomBoundaryStones/BoundaryStoneSet_Forest/wallmonitorforestbg";
+                var wallMonitor = GameObject.Find(wallMonitorPath);
+                if (wallMonitor != null)
                 {
-                    color = colorMaterial.color
-                };
+                    var r = wallMonitor.GetComponent<Renderer>();
+                    if (r != null) r.material = mat;
+                }
 
-                GameObject.Find("Environment Objects/LocalObjects_Prefab/TreeRoom/TreeRoomBoundaryStones/BoundaryStoneSet_Forest/wallmonitorforestbg")
-                    .GetComponent<Renderer>().material = mat;
+                const string motdBodyPath = "Environment Objects/LocalObjects_Prefab/TreeRoom/motdBodyText";
+                const string motdHeadingPath = "Environment Objects/LocalObjects_Prefab/TreeRoom/motdHeadingText";
+                const string cocHeadingPath = "Environment Objects/LocalObjects_Prefab/TreeRoom/CodeOfConductHeadingText";
 
-                string motdBodyPath = "Environment Objects/LocalObjects_Prefab/TreeRoom/motdBodyText";
-                string motdHeadingPath = "Environment Objects/LocalObjects_Prefab/TreeRoom/motdHeadingText";
-                string cocHeadingPath = "Environment Objects/LocalObjects_Prefab/TreeRoom/CodeOfConductHeadingText";
                 if (PhotonNetwork.InRoom)
                 {
-                    TextMeshPro motdText = GameObject.Find(motdBodyPath).GetComponent<TextMeshPro>();
-                    motdText.text = $"Hey guys its tortise if you want to support me give me money.\n now here are the details of your lobby\n \n" +
-                                    $"Is Master {PhotonNetwork.IsMasterClient}\nPlayer Count: {PhotonNetwork.CurrentRoom.PlayerCount} / 10 \nRegion: {PhotonNetwork.CloudRegion}";
-                    GameObject.Find(motdBodyPath).GetComponent<MeshRenderer>().material.color = BoardColor;
+                    var motdObj = GameObject.Find(motdBodyPath);
+                    if (motdObj != null)
+                    {
+                        var motdText = motdObj.GetComponent<TextMeshPro>();
+                        if (motdText != null)
+                        {
+                            motdText.text = $"Hey guys its tortise if you want to support me give me money.\n now here are the details of your lobby\n \n" +
+                                            $"Is Master {PhotonNetwork.IsMasterClient}\nPlayer Count: {PhotonNetwork.CurrentRoom.PlayerCount} / 10 \nRegion: {PhotonNetwork.CloudRegion}";
+                            var meshRenderer = motdObj.GetComponent<MeshRenderer>();
+                            if (meshRenderer != null) meshRenderer.material.color = BoardColor;
+                        }
+                    }
 
-                    GameObject.Find(cocHeadingPath).GetComponent<TextMeshPro>().text = "Violet Made By: Tortise& RaiseEvent201";
+                    var cocHeadingObj = GameObject.Find(cocHeadingPath);
+                    if (cocHeadingObj != null)
+                    {
+                        var cocHeading = cocHeadingObj.GetComponent<TextMeshPro>();
+                        if (cocHeading != null) cocHeading.text = "Violet Made By: Tortise& RaiseEvent201";
+                    }
                 }
                 else
                 {
-                    GameObject.Find(motdBodyPath).GetComponent<TextMeshPro>().text = "not in room join one....";
-                    GameObject.Find(motdBodyPath).GetComponent<MeshRenderer>().material.color = BoardColor;
+                    var motdObj = GameObject.Find(motdBodyPath);
+                    if (motdObj != null)
+                    {
+                        var motdText = motdObj.GetComponent<TextMeshPro>();
+                        if (motdText != null)
+                        {
+                            motdText.text = "not in room join one....";
+                            var meshRenderer = motdObj.GetComponent<MeshRenderer>();
+                            if (meshRenderer != null) meshRenderer.material.color = BoardColor;
+                        }
+                    }
 
-                    GameObject.Find(motdHeadingPath).GetComponent<TextMeshPro>().text = $"Violet V{VioletPaid.Initialization.PluginInfo.menuVersion}";
-                    GameObject.Find(motdHeadingPath).GetComponent<MeshRenderer>().material.color = BoardColor;
-                    GameObject.Find(cocHeadingPath).GetComponent<TextMeshPro>().text = "Violet Made By: Tortise & RaiseEvent201";
-                    GameObject.Find(cocHeadingPath).GetComponent<MeshRenderer>().material.color = BoardColor;
+                    var motdHeadingObj = GameObject.Find(motdHeadingPath);
+                    if (motdHeadingObj != null)
+                    {
+                        var motdHeadingText = motdHeadingObj.GetComponent<TextMeshPro>();
+                        if (motdHeadingText != null)
+                        {
+                            motdHeadingText.text = $"Violet V{VioletPaid.Initialization.PluginInfo.menuVersion}";
+                            var meshRenderer = motdHeadingObj.GetComponent<MeshRenderer>();
+                            if (meshRenderer != null) meshRenderer.material.color = BoardColor;
+                        }
+                    }
+
+                    var cocHeadingObj = GameObject.Find(cocHeadingPath);
+                    if (cocHeadingObj != null)
+                    {
+                        var cocHeading = cocHeadingObj.GetComponent<TextMeshPro>();
+                        if (cocHeading != null)
+                        {
+                            cocHeading.text = "Violet Made By: Tortise & RaiseEvent201";
+                            var meshRenderer = cocHeadingObj.GetComponent<MeshRenderer>();
+                            if (meshRenderer != null) meshRenderer.material.color = BoardColor;
+                        }
+                    }
                 }
 
-                GameObject GamemodeTitle = GameObject.Find("Environment Objects/LocalObjects_Prefab/TreeRoom/GameModes Title Text");
-                GamemodeTitle.GetComponent<MeshRenderer>().material.color = BoardColor;
-                GamemodeTitle.GetComponent<TextMeshPro>().text = "Violet";
+                var gamemodeTitle = GameObject.Find("Environment Objects/LocalObjects_Prefab/TreeRoom/GameModes Title Text");
+                if (gamemodeTitle != null)
+                {
+                    var mesh = gamemodeTitle.GetComponent<MeshRenderer>();
+                    if (mesh != null) mesh.material.color = BoardColor;
+                    var txt = gamemodeTitle.GetComponent<TextMeshPro>();
+                    if (txt != null) txt.text = "Violet";
+                }
 
-
-                Material mater = new Material(Shader.Find("GorillaTag/UberShader"));
-                mater.color = colorMaterial.color;
+                var mater = new Material(Shader.Find("GorillaTag/UberShader")) { color = colorMaterial.color };
                 Tools.ChangeBoardMaterial("Environment Objects/LocalObjects_Prefab/TreeRoom", 5, mater, ref originalMat1);
                 Tools.ChangeBoardMaterial("Environment Objects/LocalObjects_Prefab/Forest", 13, mater, ref originalMat2);
                 Tools.ChangeBoardMaterial("Environment Objects/LocalObjects_Prefab/Forest/Terrain", 11, mater, ref originalMat3);
 
-                MeshRenderer monitorRenderer = GameObject.Find("Environment Objects/LocalObjects_Prefab/TreeRoom/TreeRoomInteractables/GorillaComputerObject/ComputerUI/monitor/monitorScreen").GetComponent<MeshRenderer>();
-                monitorRenderer.material = mat;
-                monitorRenderer.material.color = colorMaterial.color;
+                var monitorRendererObj = GameObject.Find("Environment Objects/LocalObjects_Prefab/TreeRoom/TreeRoomInteractables/GorillaComputerObject/ComputerUI/monitor/monitorScreen");
+                if (monitorRendererObj != null)
+                {
+                    var monitorRenderer = monitorRendererObj.GetComponent<MeshRenderer>();
+                    if (monitorRenderer != null)
+                    {
+                        monitorRenderer.material = mat;
+                        monitorRenderer.material.color = colorMaterial.color;
+                    }
+                }
 
-                string cocBodyPath = "Environment Objects/LocalObjects_Prefab/TreeRoom/COCBodyText_TitleData";
-                TextMeshPro cocText = GameObject.Find(cocBodyPath).GetComponent<TextMeshPro>();
-                cocText.color = BoardColor;
-                cocText.fontStyle = FontStyles.Bold;
-                cocText.alignment = TextAlignmentOptions.Top;
-                cocText.fontSize = 75;
-                cocText.text = PhotonNetwork.InRoom ? "\n \n" + PlayerInfo : "\nNOT CONNECTED TO A ROOM\n";
+                const string cocBodyPath = "Environment Objects/LocalObjects_Prefab/TreeRoom/COCBodyText_TitleData";
+                var cocBodyObj = GameObject.Find(cocBodyPath);
+                if (cocBodyObj != null)
+                {
+                    var cocText = cocBodyObj.GetComponent<TextMeshPro>();
+                    if (cocText != null)
+                    {
+                        cocText.color = BoardColor;
+                        cocText.fontStyle = FontStyles.Bold;
+                        cocText.alignment = TextAlignmentOptions.Top;
+                        cocText.fontSize = 75;
+                        cocText.text = PhotonNetwork.InRoom ? "\n \n" + PlayerInfo : "\nNOT CONNECTED TO A ROOM\n";
+                    }
+                }
 
-                string cocTextPath = "Environment Objects/LocalObjects_Prefab/TreeRoom/COC Text";
-                TextMeshPro cocText2 = GameObject.Find(cocTextPath).GetComponent<TextMeshPro>();
-                cocText2.alignment = TextAlignmentOptions.Top;
-                cocText2.color = BoardColor;
+                const string cocTextPath = "Environment Objects/LocalObjects_Prefab/TreeRoom/COC Text";
+                var cocTextObj2 = GameObject.Find(cocTextPath);
+                if (cocTextObj2 != null)
+                {
+                    var cocText2 = cocTextObj2.GetComponent<TextMeshPro>();
+                    if (cocText2 != null)
+                    {
+                        cocText2.alignment = TextAlignmentOptions.Top;
+                        cocText2.color = BoardColor;
+                    }
+                }
 
-                GameObject.Find("Environment Objects/LocalObjects_Prefab/TreeRoom/GameModes Title Text").GetComponent<TextMeshPro>().text = "Violet";
-                GameObject.Find("Environment Objects/LocalObjects_Prefab/TreeRoom/GameModes Title Text").GetComponent<MeshRenderer>().material.color = BoardColor;
+                var gmTitleObj = GameObject.Find("Environment Objects/LocalObjects_Prefab/TreeRoom/GameModes Title Text");
+                if (gmTitleObj != null)
+                {
+                    var gmText = gmTitleObj.GetComponent<TextMeshPro>();
+                    if (gmText != null) gmText.text = "Violet";
+                    var gmMesh = gmTitleObj.GetComponent<MeshRenderer>();
+                    if (gmMesh != null) gmMesh.material.color = BoardColor;
+                }
             }
             catch (Exception ex)
             {
+                Debug.LogError($"Board() exception: {ex.Message}");
             }
         }
-
-      
 
         public static void Draw()
         {
@@ -353,7 +478,6 @@ namespace Violet.Menu
             background.transform.localScale = new Vector3(0.11f, 0.97f, 1.03f);
             background.name = "menucolor";
             background.transform.position = new Vector3(0.05f, 0f, -0f);
-            
         }
 
         private static void CreateMenuCanvasAndTitle()
@@ -384,37 +508,36 @@ namespace Violet.Menu
 
         private static void AddDisconnectButton()
         {
-            if (PhotonNetwork.InRoom)
-            {
-                disconnectButton = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                Destroy(disconnectButton.GetComponent<Rigidbody>());
-                disconnectButton.GetComponent<BoxCollider>().isTrigger = true;
-                Outline(disconnectButton, Indigo);
-                disconnectButton.transform.parent = menuObj.transform;
-                disconnectButton.transform.rotation = Quaternion.identity;
-                disconnectButton.transform.localScale = new Vector3(0.09f, 0.9f, 0.08f);
-                disconnectButton.transform.localPosition = new Vector3(0.56f, 0f, 0.588f);
-                disconnectButton.AddComponent<BtnCollider>().clickedButton = new ButtonHandler.Button("DisconnectButton", Category.Home, false, false, null, null);
-                disconnectButton.GetComponent<Renderer>().material.color = DisconnectColor;
-
-                var discontext = new GameObject { transform = { parent = canvasObj.transform } }.AddComponent<Text>();
-                discontext.text = "Disconnect";
-                discontext.font = Font.CreateDynamicFontFromOSFont("Anton", 1);
-                discontext.fontStyle = FontStyle.Bold;
-                discontext.color = Theme == 3 ? Black : White;
-                discontext.alignment = TextAnchor.MiddleCenter;
-                discontext.resizeTextForBestFit = true;
-                discontext.resizeTextMinSize = 0;
-                var rectt = discontext.GetComponent<RectTransform>();
-                rectt.localScale = new Vector3(0.9f, 0.9f, 0.9f);
-                rectt.sizeDelta = new Vector2(0.13f, 0.023f);
-                rectt.localPosition = new Vector3(0.064f, 0f, 0.2295f);
-                rectt.rotation = Quaternion.Euler(180f, 90f, 90f);
-            }
-            else
+            if (!PhotonNetwork.InRoom)
             {
                 Destroy(disconnectButton);
+                return;
             }
+
+            disconnectButton = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            Destroy(disconnectButton.GetComponent<Rigidbody>());
+            disconnectButton.GetComponent<BoxCollider>().isTrigger = true;
+            Outline(disconnectButton, Indigo);
+            disconnectButton.transform.parent = menuObj.transform;
+            disconnectButton.transform.rotation = Quaternion.identity;
+            disconnectButton.transform.localScale = new Vector3(0.09f, 0.9f, 0.08f);
+            disconnectButton.transform.localPosition = new Vector3(0.56f, 0f, 0.588f);
+            disconnectButton.AddComponent<BtnCollider>().clickedButton = new ButtonHandler.Button("DisconnectButton", Category.Home, false, false, null, null);
+            disconnectButton.GetComponent<Renderer>().material.color = DisconnectColor;
+
+            var discontext = new GameObject { transform = { parent = canvasObj.transform } }.AddComponent<Text>();
+            discontext.text = "Disconnect";
+            discontext.font = Font.CreateDynamicFontFromOSFont("Anton", 1);
+            discontext.fontStyle = FontStyle.Bold;
+            discontext.color = Theme == 3 ? Black : White;
+            discontext.alignment = TextAnchor.MiddleCenter;
+            discontext.resizeTextForBestFit = true;
+            discontext.resizeTextMinSize = 0;
+            var rectt = discontext.GetComponent<RectTransform>();
+            rectt.localScale = new Vector3(0.9f, 0.9f, 0.9f);
+            rectt.sizeDelta = new Vector2(0.13f, 0.023f);
+            rectt.localPosition = new Vector3(0.064f, 0f, 0.2295f);
+            rectt.rotation = Quaternion.Euler(180f, 90f, 90f);
         }
 
         private static void AddReturnButton()
@@ -623,19 +746,18 @@ namespace Violet.Menu
                 yuh.transform.position = new Vector3(0.05f, 0.21f, -0f);*/
             }
 
-            index = 0; 
-            if (PhotonNetwork.PlayerList != null)
-            {
-                for (int i = 0; i < PhotonNetwork.PlayerList.Length && i < 10; i++)
-                {
-                    var plr = PhotonNetwork.PlayerList[i];
-                    float multiplier = i;
-                    float textOffset = i * 0.037f;
-                    Category category = Category.Player;
+            index = 0;
+            if (PhotonNetwork.PlayerList == null) return;
 
-                    PlayerTab(multiplier, textOffset, category, plr);
-                    index++;
-                }
+            for (int i = 0; i < PhotonNetwork.PlayerList.Length && i < 10; i++)
+            {
+                var plr = PhotonNetwork.PlayerList[i];
+                float multiplier = i;
+                float textOffset = i * 0.037f;
+                Category category = Category.Player;
+
+                PlayerTab(multiplier, textOffset, category, plr);
+                index++;
             }
         }
 
@@ -722,23 +844,22 @@ namespace Violet.Menu
 
         private static void PositionMenuForKeyboard()
         {
-            if (thirdPersonCamera != null)
-            {
-                thirdPersonCamera.transform.position = new Vector3(-65.8373f, 21.6568f, -80.9763f);
-                thirdPersonCamera.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
-                menuObj.transform.SetParent(thirdPersonCamera.transform, true);
+            if (thirdPersonCamera == null) return;
 
-                var headPosition = thirdPersonCamera.transform.position;
-                var headRotation = thirdPersonCamera.transform.rotation;
-                float offsetDistance = 0.65f;
-                var offsetPosition = headPosition + headRotation * Vector3.forward * offsetDistance;
-                menuObj.transform.position = offsetPosition;
+            thirdPersonCamera.transform.position = new Vector3(-65.8373f, 21.6568f, -80.9763f);
+            thirdPersonCamera.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
+            menuObj.transform.SetParent(thirdPersonCamera.transform, true);
 
-                var directionToHead = headPosition - menuObj.transform.position;
-                menuObj.transform.rotation = Quaternion.LookRotation(directionToHead, Vector3.up);
-                menuObj.transform.Rotate(Vector3.up, -90f);
-                menuObj.transform.Rotate(Vector3.right, -90f);
-            }
+            var headPosition = thirdPersonCamera.transform.position;
+            var headRotation = thirdPersonCamera.transform.rotation;
+            float offsetDistance = 0.65f;
+            var offsetPosition = headPosition + headRotation * Vector3.forward * offsetDistance;
+            menuObj.transform.position = offsetPosition;
+
+            var directionToHead = headPosition - menuObj.transform.position;
+            menuObj.transform.rotation = Quaternion.LookRotation(directionToHead, Vector3.up);
+            menuObj.transform.Rotate(Vector3.up, -90f);
+            menuObj.transform.Rotate(Vector3.right, -90f);
         }
 
         public static void AddButtonClicker(Transform parentTransform)
@@ -764,12 +885,11 @@ namespace Violet.Menu
 
         public static void AddRigidbodyToMenu()
         {
-            if (currentMenuRigidbody == null && menuObj != null)
-            {
-                currentMenuRigidbody = menuObj.GetComponent<Rigidbody>() ?? menuObj.AddComponent<Rigidbody>();
-                currentMenuRigidbody.useGravity = gravity;
-                currentMenuRigidbody.mass = 0.5f;
-            }
+            if (menuObj == null) return;
+
+            currentMenuRigidbody = menuObj.GetComponent<Rigidbody>() ?? menuObj.AddComponent<Rigidbody>();
+            currentMenuRigidbody.useGravity = gravity;
+            currentMenuRigidbody.mass = 0.5f;
         }
 
 

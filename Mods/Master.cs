@@ -45,7 +45,7 @@ namespace Violet.Mods
                     GreyZoneManager.Instance.greyZoneActive = true;
                     GreyZoneManager.Instance.photonConnectedDuringActivation = PhotonNetwork.InRoom;
                     GreyZoneManager.Instance.greyZoneActivationTime = PhotonNetwork.Time;
-                    GreyZoneManager.Instance.gravityFactorOptionSelection = int.MaxValue;
+                    GreyZoneManager.Instance.gravityFactorOptionSelection = 0;
                     SerializeUpdate(GreyZoneManager.Instance.photonView, new RaiseEventOptions
                     {
                         TargetActors = new int[] { GunTemplate.lockedPlayer.creator.ActorNumber },

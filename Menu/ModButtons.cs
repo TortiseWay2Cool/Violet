@@ -103,6 +103,7 @@ namespace Violet.Menu
             new Button("Master", Category.Overpowered, false, false, () => ChangePage(Category.Master)),
             new Button("Scitzo Gun", Category.Overpowered, true, false, () => ScitzoGun()),
             new Button("Reverse Scitzo Gun", Category.Overpowered, true, false, () => ReverseScitzoGun()),
+            new Button("Lag All", Category.Overpowered, true, false, () => Lag(0)),
 
             // Master
             new Button("Back", Category.Master, false, false, () => ChangePage(Category.Overpowered)),

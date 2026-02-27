@@ -64,7 +64,7 @@ namespace Violet.Menu
             
             //menu settings
             new Button("Right-Handed Menu", Category.MenuSettings, true, false, () => rightHandedMenu = false, () => rightHandedMenu = true),
-            new Button("Custom Boards", Category.MenuSettings, true, true, () => Main.Board()), // Adding this Later
+            //new Button("Custom Boards", Category.MenuSettings, true, false, () => Main.Board()), // Adding this Later
             new Button("Disable Array List", Category.MenuSettings, true, false, () => VioletGUI.guiEnabled = true, () => VioletGUI.guiEnabled = false),
             new Button("Toggle Disconect Button", Category.MenuSettings, true, false, () => toggledisconnectButton = true, ()=> toggledisconnectButton = false),
             new Button("Toggle Player Catagorys", Category.MenuSettings, true, false, () => SideCatagorys = true, () => SideCatagorys = false),

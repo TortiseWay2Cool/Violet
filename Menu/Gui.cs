@@ -48,7 +48,7 @@ namespace Violet.GUI
         private const float DisplayDuration = 2f;
         private const float MoveDuration = 1.5f;
         private const float LineAnimSpeed = 300f;
-        private const string ImageUrl = "https://i.ibb.co/XfdnK2t7/image-Photoroom.png";
+        private const string ImageUrl = "https://i.ibb.co/Q35CRZpP/image-Photoroom-1.png";
 
         private Texture2D rgbGradientTex;
         private static Texture2D downloadedImage;
@@ -172,8 +172,8 @@ namespace Violet.GUI
             moveProgress = 0f;
             imageDisplayStartTime = Time.time;
 
-            const float bigScale = 0.6f;
-            const float smallScale = 0.2f;
+            const float bigScale = 1f;
+            const float smallScale = 0.4f;
 
             if (downloadedImage != null)
             {

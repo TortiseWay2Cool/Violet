@@ -15,6 +15,7 @@ using UnityEngine.UI;
 using Violet.GUI;
 using Violet.Initialization;
 using Violet.Menu;
+using Violet.Menu.Utilities;
 using Violet.Utilities;
 using VioletPaid.Utilities;
 using static Violet.Menu.ButtonHandler;
@@ -130,6 +131,12 @@ namespace Violet.Menu
             }
         }
 
+        public static IEnumerator OnStartDelayed()
+        {
+            yield return new WaitForSeconds(0.1f);
+            CustomBoards.Init();
+        }
+
         private void ExitPcMenuMode()
         {
             isInPcCondition = false;
@@ -189,7 +196,8 @@ namespace Violet.Menu
         {
             ResourceLoader.LoadResources();
             StartCoroutine(StartMenuDelayed());
-            Board();
+            //Board();
+            StartCoroutine(OnStartDelayed());
             taggerInstance = GorillaTagger.Instance;
             playerInstance = GorillaLocomotion.GTPlayer.Instance;
             pollerInstance = ControllerInputPoller.instance;

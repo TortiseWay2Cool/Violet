@@ -13,6 +13,7 @@ using static Violet.Mods.Master;
 
 using UnityEngine;
 using Violet.GUI;
+using Violet.Menu.Utilities;
 
 namespace Violet.Menu
 {
@@ -76,10 +77,10 @@ namespace Violet.Menu
             new Button("Current Menu Sound", Category.MenuSettings, false, false, ()=> Main.ChangeSound()),
             
             // Gun Settings
-            new Button("Gun Example", Category.GunSettings, true, false, () => GunTemplate.GunExample()),
-            new Button("Change Gun Colors []", Category.GunSettings, false, false, () => GunTemplate.ChangeTheme()),
+            new Button("Gun Example", Category.GunSettings, true, false, () => GunLib.MakeGun(true, null)),
+            /*new Button("Change Gun Colors []", Category.GunSettings, false, false, () => GunTemplate.ChangeTheme()),
             new Button("Change Line Width []", Category.GunSettings, false, false, () => GunTemplate.ChangeLineWidth()),
-            new Button("Change Gun Line []", Category.GunSettings, false, false, () => GunTemplate.ChangeLineStyle()),
+            new Button("Change Gun Line []", Category.GunSettings, false, false, () => GunTemplate.ChangeLineStyle()),*/
 
             // Room
             new Button("Check If Master []", Category.Room, false, false, ()=> Tools.IsMasterCheck()),

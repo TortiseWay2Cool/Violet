@@ -36,9 +36,10 @@ namespace Violet.Menu
         private static bool isPCMenuOpen;
         private static bool isInPcCondition;
         private static bool isInMenuCondition;
-        private static GameObject thirdPersonCamera;
+        public static GameObject thirdPersonCamera;
         private static GameObject cm;
         public static bool RoundedMenuEnabled = true;
+        public static bool RoundedMenuButtonsEnabled = false;
         public void Update()
         {
             UpdateNotificationsAndButtons();
@@ -730,7 +731,7 @@ namespace Violet.Menu
                 btnRenderer.material.color = button.Enabled ? ButtonColorOn : ButtonColorOff;
             }
 
-            if (RoundedMenuEnabled)
+            if (RoundedMenuButtonsEnabled)
             {
                 RoundModButton(modButton, 0.025f);
             }

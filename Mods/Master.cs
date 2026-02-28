@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using Violet.Menu.Utilities;
 using Violet.Utilities;
 using static Violet.Mods.Advantage;
 
@@ -38,7 +39,7 @@ namespace Violet.Mods
 
         public static void ZeroGravityGun()
         {
-            GunTemplate.StartBothGuns(() =>
+            GunLib.MakeGun(true, () =>
             {
                 RunViewUpdatePatch.SerilizeData = () =>
                 {
@@ -48,11 +49,11 @@ namespace Violet.Mods
                     GreyZoneManager.Instance.gravityFactorOptionSelection = 0;
                     SerializeUpdate(GreyZoneManager.Instance.photonView, new RaiseEventOptions
                     {
-                        TargetActors = new int[] { GunTemplate.lockedPlayer.creator.ActorNumber },
+                        TargetActors = new int[] { GunLib.LockedRig.creator.ActorNumber },
                     });
                     return false;
                 };
-            }, true);
+            });
         }
 
         public static void GreyScreenAll()
@@ -80,7 +81,7 @@ namespace Violet.Mods
 
         public static void GreyScreenGun()
         {
-            GunTemplate.StartBothGuns(() =>
+            GunLib.MakeGun(true, () =>
             {
                 RunViewUpdatePatch.SerilizeData = () =>
                 {
@@ -89,11 +90,11 @@ namespace Violet.Mods
                     GreyZoneManager.Instance.greyZoneActivationTime = (GreyZoneManager.Instance.photonConnectedDuringActivation ? PhotonNetwork.Time : ((double)Time.time));
                     SerializeUpdate(GreyZoneManager.Instance.photonView, new RaiseEventOptions
                     {
-                        TargetActors = new int[] { GunTemplate.lockedPlayer.creator.ActorNumber },
+                        TargetActors = new int[] { GunLib.LockedRig.creator.ActorNumber },
                     });
                     return false;
                 };
-            }, true);
+            });
         }
 
         

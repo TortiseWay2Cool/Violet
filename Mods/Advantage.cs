@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
+using Violet.Menu.Utilities;
 using Violet.Utilities;
 using VioletPaid.Utilities;
 
@@ -93,15 +94,15 @@ namespace Violet.Mods
 
         public static void TagGun()
         {
-            GunTemplate.StartBothGuns(() =>
+            GunLib.MakeGun(true, () =>
             {
                 if (PhotonNetwork.InRoom)
                 {
-                    if (!Tools.RigIsInfected(GunTemplate.lockedPlayer))
+                    if (!Tools.RigIsInfected(GunLib.LockedRig))
                     {
-                        VRRig.LocalRig.transform.position = GunTemplate.lockedPlayer.transform.position;
+                        VRRig.LocalRig.transform.position = GunLib.LockedRig.transform.position;
 
-                        GameObject.Find("Player Objects/RigCache/Network Parent/GameMode(Clone)").GetPhotonView().RPC("RPC_ReportTag", RpcTarget.MasterClient, new object[] { GunTemplate.lockedPlayer.creator.ActorNumber });
+                        GameObject.Find("Player Objects/RigCache/Network Parent/GameMode(Clone)").GetPhotonView().RPC("RPC_ReportTag", RpcTarget.MasterClient, new object[] { GunLib.LockedRig.creator.ActorNumber });
                         SerializeUpdate(GorillaTagger.Instance.myVRRig.punView, new RaiseEventOptions
                         {
                             TargetActors = new int[] { PhotonNetwork.MasterClient.ActorNumber }
@@ -110,7 +111,7 @@ namespace Violet.Mods
                     }
 
                 }
-            }, true);
+            });
         }
 
         public static void TagAll()
@@ -121,9 +122,9 @@ namespace Violet.Mods
                 {
                     Player plr = PhotonNetwork.PlayerListOthers[i];
 
-                    VRRig.LocalRig.transform.position = GunTemplate.lockedPlayer.transform.position;
+                    VRRig.LocalRig.transform.position = GunLib.LockedRig.transform.position;
 
-                    GameObject.Find("Player Objects/RigCache/Network Parent/GameMode(Clone)").GetPhotonView().RPC("RPC_ReportTag", RpcTarget.MasterClient, new object[] { GunTemplate.lockedPlayer.creator.ActorNumber });
+                    GameObject.Find("Player Objects/RigCache/Network Parent/GameMode(Clone)").GetPhotonView().RPC("RPC_ReportTag", RpcTarget.MasterClient, new object[] { GunLib.LockedRig.creator.ActorNumber });
                     SerializeUpdate(GorillaTagger.Instance.myVRRig.punView, new RaiseEventOptions
                     {
                         TargetActors = new int[] { PhotonNetwork.MasterClient.ActorNumber }

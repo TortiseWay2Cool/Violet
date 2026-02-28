@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using Violet.Menu.Utilities;
 using Violet.Utilities;
 using VioletPaid.Utilities;
 using static Violet.Mods.Advantage;
@@ -15,11 +16,11 @@ namespace Violet.Mods
     {
         public static void ScitzoGun()
         {
-            GunTemplate.StartBothGuns(() =>
+            GunLib.MakeGun(true, () =>
             {
                 if (PhotonNetwork.InRoom)
                 {
-                    if (GunTemplate.lockedPlayer != null)
+                    if (GunLib.LockedRig != null)
                     {
                         RunViewUpdatePatch.SerilizeData = () =>
                         {
@@ -27,15 +28,15 @@ namespace Violet.Mods
 
                             SerializeUpdate(GorillaTagger.Instance.myVRRig.punView, new RaiseEventOptions
                             {
-                                TargetActors = new int[] { GunTemplate.lockedPlayer.creator.ActorNumber},
+                                TargetActors = new int[] { GunLib.LockedRig.creator.ActorNumber},
                             });
 
                             return false;
                         };
                     }
                 }
-            }, true);
-            if (GunTemplate.lockedPlayer == null)
+            });
+            if (GunLib.LockedRig == null)
             {
                 RunViewUpdatePatch.SerilizeData = () =>
                 {
@@ -51,13 +52,13 @@ namespace Violet.Mods
 
         public static void ReverseScitzoGun()
         {
-            GunTemplate.StartBothGuns(() =>
+            GunLib.MakeGun(true, () =>
             {
                 if (PhotonNetwork.InRoom)
                 {
                     foreach (Player plr in PhotonNetwork.PlayerListOthers)
                     {
-                        if (plr != RigManager.GetPlayerFromVRRig(GunTemplate.lockedPlayer))
+                        if (plr != RigManager.GetPlayerFromVRRig(GunLib.LockedRig))
                         {
                             RunViewUpdatePatch.SerilizeData = () =>
                             {
@@ -72,8 +73,8 @@ namespace Violet.Mods
                         }
                     }
                 }
-            }, true);
-            if (GunTemplate.lockedPlayer == null)
+            });
+            if (GunLib.LockedRig == null)
             {
                 RunViewUpdatePatch.SerilizeData = () =>
                 {

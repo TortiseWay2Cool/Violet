@@ -141,30 +141,6 @@ namespace Violet.Mods
         {
             if (PhotonNetwork.InRoom)
             {
-                foreach (Player plr in PhotonNetwork.PlayerListOthers)
-                {
-                    if (plr != PhotonNetwork.LocalPlayer)
-                    {
-                        RunViewUpdatePatch.SerilizeData = () =>
-                        {
-                            VRRig.LocalRig.transform.position = RigManager.GetVRRigFromPlayer(plr).transform.position;
-                            GameObject.Find("Player Objects/RigCache/Network Parent/GameMode(Clone)").GetPhotonView().RPC("RPC_ReportTag", RpcTarget.MasterClient, new object[] { PhotonNetwork.LocalPlayer.ActorNumber });
-                            SerializeUpdate(GorillaTagger.Instance.myVRRig.punView, new RaiseEventOptions
-                            {
-                                TargetActors = new int[] { plr.ActorNumber }
-                            });
-                            return false;
-                        };
-                    }
-                }
-            }
-
-        }
-
-        public static void TagSelf()
-        {
-            if (PhotonNetwork.InRoom)
-            {
                 if (PhotonNetwork.IsMasterClient)
                 {
                     GorillaTagManager component = GorillaGameManager.instance.gameObject.GetComponent<GorillaTagManager>();
@@ -247,10 +223,6 @@ namespace Violet.Mods
                                     };
                                 }
                             }
-                            else
-                            {
-                                Advantage.ResetPlayer();
-                            }
                         }
                     }
                 }
@@ -274,10 +246,10 @@ namespace Violet.Mods
 
         public static void MatGun()
         {
-            GunTemplate.StartBothGuns(() =>
+            GunLib.MakeGun(true, () =>
             {
-                Advantage.MatPlayer(RigManager.GetPlayerFromVRRig(GunTemplate.lockedPlayer));
-            }, true);
+                Advantage.MatPlayer(RigManager.GetPlayerFromVRRig(GunLib.LockedRig));
+            });
         }
 
         public static void MatAll()
@@ -358,10 +330,10 @@ namespace Violet.Mods
         {
             if (PhotonNetwork.IsMasterClient)
             {
-                GunTemplate.StartBothGuns(() =>
+                GunLib.MakeGun(true, () =>
                 {
-                    GorillaGameManager.instance.HitPlayer(GunTemplate.lockedPlayer.creator);
-                }, true);
+                    GorillaGameManager.instance.HitPlayer(GunLib.LockedRig.creator);
+                });
             }
         }
 
@@ -377,10 +349,10 @@ namespace Violet.Mods
         {
             if (PhotonNetwork.IsMasterClient)
             {
-                GunTemplate.StartBothGuns(() =>
+                GunLib.MakeGun(true, () =>
                 {
-                    GorillaGameManager.instance.gameObject.GetComponent<GorillaPaintbrawlManager>().playerLives[GunTemplate.lockedPlayer.creator.ActorNumber] = 9999;
-                }, true);
+                    GorillaGameManager.instance.gameObject.GetComponent<GorillaPaintbrawlManager>().playerLives[GunLib.LockedRig.creator.ActorNumber] = 9999;
+                });
             }
         }
 
@@ -404,10 +376,10 @@ namespace Violet.Mods
             if (PhotonNetwork.IsMasterClient)
             {
                 GorillaPaintbrawlManager gpm = GorillaGameManager.instance.gameObject.GetComponent<GorillaPaintbrawlManager>();
-                GunTemplate.StartBothGuns(() =>
+                GunLib.MakeGun(true, () =>
                 {
-                    gpm.playerLives[GunTemplate.lockedPlayer.creator.ActorNumber] = 1;
-                }, true);
+                    gpm.playerLives[GunLib.LockedRig.creator.ActorNumber] = 1;
+                });
             }
         }
 
@@ -446,13 +418,13 @@ namespace Violet.Mods
 
         public static void SlowGun()
         {
-            GunTemplate.StartBothGuns(delegate
+            GunLib.MakeGun(true, delegate
             {
                 Advantage.SlowPlayer(new object[]
                 {
-            GunTemplate.lockedPlayer.creator
+                    GunLib.LockedRig.creator
                 });
-            }, true);
+            });
         }
 
         public static void SlowAll()

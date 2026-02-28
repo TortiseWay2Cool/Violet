@@ -24,11 +24,11 @@ namespace Violet.Mods
                     {
                         RunViewUpdatePatch.SerilizeData = () =>
                         {
-                            VRRig.LocalRig.transform.position = new Vector3(0,999,0);
+                            VRRig.LocalRig.transform.position = new Vector3(0, 999, 0);
 
                             SerializeUpdate(GorillaTagger.Instance.myVRRig.punView, new RaiseEventOptions
                             {
-                                TargetActors = new int[] { GunLib.LockedRig.creator.ActorNumber},
+                                TargetActors = new int[] { GunLib.LockedRig.creator.ActorNumber },
                             });
 
                             return false;
@@ -89,7 +89,7 @@ namespace Violet.Mods
         }
 
 
-        public static void Lag(int Index)  
+        public static void Lag(int Index)
         {
             if (Index == 0)
             {
@@ -114,7 +114,7 @@ namespace Violet.Mods
                     PhotonNetwork.SendAllOutgoingCommands();
                 }
             }
-            
+
         }
         public static void KickMaster()
         {

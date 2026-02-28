@@ -160,5 +160,335 @@ namespace Violet.Mods
             }
 
         }
+
+        public static void TagSelf()
+        {
+            if (PhotonNetwork.InRoom)
+            {
+                if (PhotonNetwork.IsMasterClient)
+                {
+                    GorillaTagManager component = GorillaGameManager.instance.gameObject.GetComponent<GorillaTagManager>();
+                    if (PhotonNetwork.CurrentRoom.PlayerCount < 4)
+                    {
+                        component.ChangeCurrentIt(PhotonNetwork.LocalPlayer, true);
+                    }
+                    else
+                    {
+                        component.AddInfectedPlayer(PhotonNetwork.LocalPlayer, true);
+                    }
+                }
+                else
+                {
+                    Player[] playerListOthers = PhotonNetwork.PlayerListOthers;
+                    for (int i = 0; i < playerListOthers.Length; i++)
+                    {
+                        Player plr = playerListOthers[i];
+                        if (plr != PhotonNetwork.LocalPlayer)
+                        {
+                            Advantage.RunViewUpdatePatch.SerilizeData = delegate ()
+                            {
+                                VRRig.LocalRig.transform.position = RigManager.GetVRRigFromPlayer(plr).transform.position;
+                                PunExtensions.GetPhotonView(GameObject.Find("Player Objects/RigCache/Network Parent/GameMode(Clone)")).RPC("RPC_ReportTag", RpcTarget.MasterClient, new object[]
+                                {
+                                    PhotonNetwork.LocalPlayer.ActorNumber
+                                });
+                                Advantage.SerializeUpdate(GorillaTagger.Instance.myVRRig.punView, new RaiseEventOptions
+                                {
+                                    TargetActors = new int[]
+                                    {
+                                        plr.ActorNumber
+                                    }
+                                });
+                                return false;
+                            };
+                        }
+                    }
+                }
+            }
+        }
+
+        public static void AntiTag()
+        {
+            if (PhotonNetwork.InRoom)
+            {
+                if (PhotonNetwork.IsMasterClient)
+                {
+                    GorillaTagManager component = GorillaGameManager.instance.gameObject.GetComponent<GorillaTagManager>();
+                    if (PhotonNetwork.CurrentRoom.PlayerCount < 4)
+                    {
+                        component.currentIt = null;
+                    }
+                    else
+                    {
+                        component.currentInfected.Remove(PhotonNetwork.LocalPlayer);
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < PhotonNetwork.PlayerListOthers.Length; i++)
+                    {
+                        if (PhotonNetwork.PlayerListOthers[i] != PhotonNetwork.LocalPlayer)
+                        {
+                            if (Vector3.Distance(GorillaTagger.Instance.leftHandTransform.position, RigManager.GetVRRigFromPlayer(PhotonNetwork.PlayerListOthers[i]).headMesh.transform.position) <= 3f)
+                            {
+                                if (!Tools.IAmInfected && Tools.RigIsInfected(RigManager.GetVRRigFromPlayer(PhotonNetwork.PlayerListOthers[i])))
+                                {
+                                    Advantage.RunViewUpdatePatch.SerilizeData = delegate ()
+                                    {
+                                        VRRig.LocalRig.transform.position = GorillaTagger.Instance.transform.position + new Vector3(0f, -8f, 0f);
+                                        Advantage.SerializeUpdate(GorillaTagger.Instance.myVRRig.punView, new RaiseEventOptions
+                                        {
+                                            TargetActors = new int[]
+                                            {
+                                                PhotonNetwork.PlayerListOthers[i].ActorNumber
+                                            }
+                                        });
+                                        return false;
+                                    };
+                                }
+                            }
+                            else
+                            {
+                                Advantage.ResetPlayer();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        public static void TagBot()
+        {
+            if (PhotonNetwork.InRoom)
+            {
+                if (Tools.IAmInfected)
+                {
+                    Advantage.TagAll();
+                }
+                else
+                {
+                    Advantage.TagSelf();
+                }
+            }
+        }
+
+        public static void MatGun()
+        {
+            GunTemplate.StartBothGuns(() =>
+            {
+                Advantage.MatPlayer(RigManager.GetPlayerFromVRRig(GunTemplate.lockedPlayer));
+            }, true);
+        }
+
+        public static void MatAll()
+        {
+            if (PhotonNetwork.InRoom)
+            {
+                foreach (Player plr in PhotonNetwork.PlayerList)
+                {
+                    Advantage.MatPlayer(plr);
+                }
+            }
+        }
+
+        public static void MatSelf()
+        {
+            if (PhotonNetwork.InRoom)
+            {
+                Advantage.MatPlayer(PhotonNetwork.LocalPlayer);
+            }
+        }
+
+        public static void MatPlayer(Player plr)
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                if (Time.time > Variables.Delay)
+                {
+                    Variables.Delay = Time.time + 0.05f;
+                    GorillaTagManager component = GorillaGameManager.instance.gameObject.GetComponent<GorillaTagManager>();
+                    if (component.currentInfected.Contains(plr))
+                    {
+                        component.currentInfected.Remove(plr);
+                    }
+                    else
+                    {
+                        component.AddInfectedPlayer(plr, false);
+                    }
+                }
+            }
+        }
+
+        public static void RestartGameMode()
+        {
+            if (PhotonNetwork.InRoom)
+            {
+                if (PhotonNetwork.IsMasterClient)
+                {
+                    GorillaTagManager component = GorillaGameManager.instance.gameObject.GetComponent<GorillaTagManager>();
+                    component.currentIt = null;
+                    component.currentInfected.Clear();
+                }
+            }
+        }
+
+        public static void SetInfectionThreshold(int Threshold)
+        {
+            if (PhotonNetwork.InRoom)
+            {
+                if (PhotonNetwork.IsMasterClient)
+                {
+                    GorillaGameManager.instance.gameObject.GetComponent<GorillaTagManager>().infectedModeThreshold = Threshold;
+                }
+            }
+        }
+
+        public static void BrawlKillAll()
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                foreach (VRRig vrrig in GorillaParent.instance.vrrigs)
+                {
+                    GorillaGameManager.instance.HitPlayer(vrrig.creator);
+                }
+            }
+        }
+
+        public static void BrawlKillGun()
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                GunTemplate.StartBothGuns(() =>
+                {
+                    GorillaGameManager.instance.HitPlayer(GunTemplate.lockedPlayer.creator);
+                }, true);
+            }
+        }
+
+        public static void BrawlInfLives(bool enable)
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                GorillaGameManager.instance.gameObject.GetComponent<GorillaPaintbrawlManager>().playerLives[PhotonNetwork.LocalPlayer.ActorNumber] = 9999;
+            }
+        }
+
+        public static void BrawlGiveInfLives()
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                GunTemplate.StartBothGuns(() =>
+                {
+                    GorillaGameManager.instance.gameObject.GetComponent<GorillaPaintbrawlManager>().playerLives[GunTemplate.lockedPlayer.creator.ActorNumber] = 9999;
+                }, true);
+            }
+        }
+
+        public static void BrawlReviveAll()
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                GorillaPaintbrawlManager component = GorillaGameManager.instance.gameObject.GetComponent<GorillaPaintbrawlManager>();
+                foreach (VRRig vrrig in GorillaParent.instance.vrrigs)
+                {
+                    if (component.playerLives[vrrig.creator.ActorNumber] > 0)
+                    {
+                        component.playerLives[vrrig.creator.ActorNumber] = 1;
+                    }
+                }
+            }
+        }
+
+        public static void BrawlReviveGun()
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                GorillaPaintbrawlManager gpm = GorillaGameManager.instance.gameObject.GetComponent<GorillaPaintbrawlManager>();
+                GunTemplate.StartBothGuns(() =>
+                {
+                    gpm.playerLives[GunTemplate.lockedPlayer.creator.ActorNumber] = 1;
+                }, true);
+            }
+        }
+
+        public static void BrawlRestart()
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                GorillaPaintbrawlManager component = GorillaGameManager.instance.gameObject.GetComponent<GorillaPaintbrawlManager>();
+                component.BattleEnd();
+                component.StartBattle();
+            }
+        }
+
+        public static void BrawlTeamBattle()
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                GorillaGameManager.instance.gameObject.GetComponent<GorillaPaintbrawlManager>().teamBattle = true;
+            }
+        }
+
+        public static void SlowPlayer(object[] stuff)
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                if (stuff[0] is Player)
+                {
+                    RoomSystem.SendStatusEffectToPlayer(RoomSystem.StatusEffects.SetSlowedTime, (NetPlayer)stuff[0]);
+                }
+                else
+                {
+                    RoomSystem.SendStatusEffectAll(RoomSystem.StatusEffects.SetSlowedTime);
+                }
+            }
+        }
+
+        public static void SlowGun()
+        {
+            GunTemplate.StartBothGuns(delegate
+            {
+                Advantage.SlowPlayer(new object[]
+                {
+            GunTemplate.lockedPlayer.creator
+                });
+            }, true);
+        }
+
+        public static void SlowAll()
+        {
+            Advantage.SlowPlayer(new object[0]);
+        }
+
+        public static void VibratePlayer(object[] stuff)
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                if (stuff[0] is Player)
+                {
+                    RoomSystem.SendStatusEffectToPlayer(RoomSystem.StatusEffects.JoinedTaggedTime, (NetPlayer)stuff[0]);
+                }
+                else
+                {
+                    RoomSystem.SendStatusEffectAll(RoomSystem.StatusEffects.JoinedTaggedTime);
+                }
+            }
+        }
+
+        public static void VibrateGun()
+        {
+            GunLib.MakeGun(true, delegate
+            {
+                Advantage.VibratePlayer(new object[]
+                {
+                    GunLib.LockedRig.creator
+                });
+            });
+        }
+
+        public static void VibrateAll()
+        {
+            Advantage.VibratePlayer(new object[0]);
+        }
     }
 }

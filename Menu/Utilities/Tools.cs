@@ -12,6 +12,44 @@ namespace VioletPaid.Utilities
 {
     internal class Tools
     {
+        public static float delay;
+        public static float Delays;
+        public static void KawaiiRPC()
+        {
+            Hashtable hashtable = new Hashtable();
+            hashtable[0] = GorillaTagger.Instance.myVRRig.ViewID;
+            PhotonNetwork.NetworkingClient.OpRaiseEvent(200, hashtable, new RaiseEventOptions
+            {
+                CachingOption = EventCaching.DoNotCache,
+                TargetActors = new int[]
+                {
+                    PhotonNetwork.LocalPlayer.ActorNumber
+                }
+            }, SendOptions.SendReliable);
+        }
+
+        public static void AutoFlushRPCS()
+        {
+            if (PhotonNetwork.InRoom)
+            {
+                if (Time.time > Tools.delay)
+                {
+                    Tools.delay = Time.time + 0.1f;
+                    Tools.KawaiiRPC();
+                }
+            }
+        }
+
+        public static bool Delay(float delayAmount)
+        {
+            if (Time.time > Tools.Delays)
+            {
+                Tools.Delays = Time.time + delayAmount;
+                return true;
+            }
+            return false;
+        }
+
         public static bool GetGamemode(string gamemodeName)
         {
             return GorillaGameManager.instance.GameModeName().ToLower().Contains(gamemodeName.ToLower());

@@ -131,12 +131,6 @@ namespace Violet.Menu
             }
         }
 
-        public static IEnumerator OnStartDelayed()
-        {
-            yield return new WaitForSeconds(0.1f);
-            CustomBoards.Init();
-        }
-
         private void ExitPcMenuMode()
         {
             isInPcCondition = false;
@@ -190,14 +184,13 @@ namespace Violet.Menu
         {
             yield return new WaitForSeconds(0.1f);
             VioletGUI.StartMenu();
+            CustomBoards.Init();
         }
 
         public void Awake()
         {
             ResourceLoader.LoadResources();
             StartCoroutine(StartMenuDelayed());
-            //Board();
-            StartCoroutine(OnStartDelayed());
             taggerInstance = GorillaTagger.Instance;
             playerInstance = GorillaLocomotion.GTPlayer.Instance;
             pollerInstance = ControllerInputPoller.instance;
@@ -282,163 +275,6 @@ namespace Violet.Menu
             }
         }
 
-        private static Material originalMat1;
-        private static Material originalMat2;
-        private static Material originalMat3;
-        private static Color32 _cachedRgbColor;
-
-        public static void Board()
-        {
-            try
-            {
-                Color32 BoardColor = Color.violet;
-
-                colorMaterial ??= new Material(Shader.Find("GorillaTag/UberShader"));
-                colorMaterial.color = ButtonColorOff;
-                colorMaterial.SetFloat("_Mode", 2f);
-
-                var mat = new Material(Shader.Find("GorillaTag/UberShader")) { color = colorMaterial.color };
-
-                var wallMonitorPath = "Environment Objects/LocalObjects_Prefab/TreeRoom/TreeRoomBoundaryStones/BoundaryStoneSet_Forest/wallmonitorforestbg";
-                var wallMonitor = GameObject.Find(wallMonitorPath);
-                if (wallMonitor != null)
-                {
-                    var r = wallMonitor.GetComponent<Renderer>();
-                    if (r != null) r.material = mat;
-                }
-
-                const string motdBodyPath = "Environment Objects/LocalObjects_Prefab/TreeRoom/motdBodyText";
-                const string motdHeadingPath = "Environment Objects/LocalObjects_Prefab/TreeRoom/motdHeadingText";
-                const string cocHeadingPath = "Environment Objects/LocalObjects_Prefab/TreeRoom/CodeOfConductHeadingText";
-
-                if (PhotonNetwork.InRoom)
-                {
-                    var motdObj = GameObject.Find(motdBodyPath);
-                    if (motdObj != null)
-                    {
-                        var motdText = motdObj.GetComponent<TextMeshPro>();
-                        if (motdText != null)
-                        {
-                            motdText.text = $"Hey guys its tortise if you want to support me give me money.\n now here are the details of your lobby\n \n" +
-                                            $"Is Master {PhotonNetwork.IsMasterClient}\nPlayer Count: {PhotonNetwork.CurrentRoom.PlayerCount} / 10 \nRegion: {PhotonNetwork.CloudRegion}";
-                            var meshRenderer = motdObj.GetComponent<MeshRenderer>();
-                            if (meshRenderer != null) meshRenderer.material.color = BoardColor;
-                        }
-                    }
-
-                    var cocHeadingObj = GameObject.Find(cocHeadingPath);
-                    if (cocHeadingObj != null)
-                    {
-                        var cocHeading = cocHeadingObj.GetComponent<TextMeshPro>();
-                        if (cocHeading != null) cocHeading.text = "Violet Made By: Tortise& RaiseEvent201";
-                    }
-                }
-                else
-                {
-                    var motdObj = GameObject.Find(motdBodyPath);
-                    if (motdObj != null)
-                    {
-                        var motdText = motdObj.GetComponent<TextMeshPro>();
-                        if (motdText != null)
-                        {
-                            motdText.text = "not in room join one....";
-                            var meshRenderer = motdObj.GetComponent<MeshRenderer>();
-                            if (meshRenderer != null) meshRenderer.material.color = BoardColor;
-                        }
-                    }
-
-                    var motdHeadingObj = GameObject.Find(motdHeadingPath);
-                    if (motdHeadingObj != null)
-                    {
-                        var motdHeadingText = motdHeadingObj.GetComponent<TextMeshPro>();
-                        if (motdHeadingText != null)
-                        {
-                            motdHeadingText.text = $"Violet V{VioletPaid.Initialization.PluginInfo.menuVersion}";
-                            var meshRenderer = motdHeadingObj.GetComponent<MeshRenderer>();
-                            if (meshRenderer != null) meshRenderer.material.color = BoardColor;
-                        }
-                    }
-
-                    var cocHeadingObj = GameObject.Find(cocHeadingPath);
-                    if (cocHeadingObj != null)
-                    {
-                        var cocHeading = cocHeadingObj.GetComponent<TextMeshPro>();
-                        if (cocHeading != null)
-                        {
-                            cocHeading.text = "Violet Made By: Tortise & RaiseEvent201";
-                            var meshRenderer = cocHeadingObj.GetComponent<MeshRenderer>();
-                            if (meshRenderer != null) meshRenderer.material.color = BoardColor;
-                        }
-                    }
-                }
-
-                var gamemodeTitle = GameObject.Find("Environment Objects/LocalObjects_Prefab/TreeRoom/GameModes Title Text");
-                if (gamemodeTitle != null)
-                {
-                    var mesh = gamemodeTitle.GetComponent<MeshRenderer>();
-                    if (mesh != null) mesh.material.color = BoardColor;
-                    var txt = gamemodeTitle.GetComponent<TextMeshPro>();
-                    if (txt != null) txt.text = "Violet";
-                }
-
-                var mater = new Material(Shader.Find("GorillaTag/UberShader")) { color = colorMaterial.color };
-                Tools.ChangeBoardMaterial("Environment Objects/LocalObjects_Prefab/TreeRoom", 5, mater, ref originalMat1);
-                Tools.ChangeBoardMaterial("Environment Objects/LocalObjects_Prefab/Forest", 13, mater, ref originalMat2);
-                Tools.ChangeBoardMaterial("Environment Objects/LocalObjects_Prefab/Forest/Terrain", 11, mater, ref originalMat3);
-
-                var monitorRendererObj = GameObject.Find("Environment Objects/LocalObjects_Prefab/TreeRoom/TreeRoomInteractables/GorillaComputerObject/ComputerUI/monitor/monitorScreen");
-                if (monitorRendererObj != null)
-                {
-                    var monitorRenderer = monitorRendererObj.GetComponent<MeshRenderer>();
-                    if (monitorRenderer != null)
-                    {
-                        monitorRenderer.material = mat;
-                        monitorRenderer.material.color = colorMaterial.color;
-                    }
-                }
-
-                const string cocBodyPath = "Environment Objects/LocalObjects_Prefab/TreeRoom/COCBodyText_TitleData";
-                var cocBodyObj = GameObject.Find(cocBodyPath);
-                if (cocBodyObj != null)
-                {
-                    var cocText = cocBodyObj.GetComponent<TextMeshPro>();
-                    if (cocText != null)
-                    {
-                        cocText.color = BoardColor;
-                        cocText.fontStyle = FontStyles.Bold;
-                        cocText.alignment = TextAlignmentOptions.Top;
-                        cocText.fontSize = 75;
-                        cocText.text = PhotonNetwork.InRoom ? "\n \n" + PlayerInfo : "\nNOT CONNECTED TO A ROOM\n";
-                    }
-                }
-
-                const string cocTextPath = "Environment Objects/LocalObjects_Prefab/TreeRoom/COC Text";
-                var cocTextObj2 = GameObject.Find(cocTextPath);
-                if (cocTextObj2 != null)
-                {
-                    var cocText2 = cocTextObj2.GetComponent<TextMeshPro>();
-                    if (cocText2 != null)
-                    {
-                        cocText2.alignment = TextAlignmentOptions.Top;
-                        cocText2.color = BoardColor;
-                    }
-                }
-
-                var gmTitleObj = GameObject.Find("Environment Objects/LocalObjects_Prefab/TreeRoom/GameModes Title Text");
-                if (gmTitleObj != null)
-                {
-                    var gmText = gmTitleObj.GetComponent<TextMeshPro>();
-                    if (gmText != null) gmText.text = "Violet";
-                    var gmMesh = gmTitleObj.GetComponent<MeshRenderer>();
-                    if (gmMesh != null) gmMesh.material.color = BoardColor;
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"Board() exception: {ex.Message}");
-            }
-        }
-
         public static void Draw()
         {
             if (menuObj != null)
@@ -492,22 +328,34 @@ namespace Violet.Menu
         {
             canvasObj = new GameObject { name = "canvas" };
             canvasObj.transform.parent = menuObj.transform;
+
             var canvas = canvasObj.AddComponent<Canvas>();
             var canvasScaler = canvasObj.AddComponent<CanvasScaler>();
             canvasObj.AddComponent<GraphicRaycaster>();
+
             canvas.renderMode = RenderMode.WorldSpace;
             canvasScaler.dynamicPixelsPerUnit = 1000;
 
-            var titleObj = new GameObject { transform = { parent = canvasObj.transform, localScale = new Vector3(0.875f, 0.875f, 1f) } };
-            title = titleObj.AddComponent<Text>();
-            title.font = ResourceLoader.ArialFont;
-            title.fontStyle = FontStyle.Bold;
+            var titleObj = new GameObject
+            {
+                transform =
+                {
+                    parent = canvasObj.transform,
+                    localScale = new Vector3(0.875f, 0.875f, 1f)
+                }
+            };
+
+            title = titleObj.AddComponent<TextMeshPro>();
+
+            title.font = MenuFontNew; 
+            title.fontStyle = FontStyles.Bold;
             title.color = Theme == 3 ? Black : White;
             title.fontSize = 7;
-            title.alignment = TextAnchor.MiddleCenter;
-            title.resizeTextForBestFit = true;
-            title.resizeTextMinSize = 0;
-            var titleTransform = title.GetComponent<RectTransform>();
+            title.alignment = TextAlignmentOptions.Center;
+            title.enableAutoSizing = true;
+            title.fontSizeMin = 0;
+
+            RectTransform titleTransform = title.GetComponent<RectTransform>();
             titleTransform.localPosition = Vector3.zero;
             titleTransform.position = new Vector3(0.07f, 0f, 0.17f);
             titleTransform.rotation = Quaternion.Euler(180f, 90f, 90f);
@@ -533,14 +381,14 @@ namespace Violet.Menu
             disconnectButton.AddComponent<BtnCollider>().clickedButton = new ButtonHandler.Button("DisconnectButton", Category.Home, false, false, null, null);
             disconnectButton.GetComponent<Renderer>().material.color = DisconnectColor;
 
-            var discontext = new GameObject { transform = { parent = canvasObj.transform } }.AddComponent<Text>();
+            var discontext = new GameObject { transform = { parent = canvasObj.transform } }.AddComponent<TextMeshPro>();
             discontext.text = "Disconnect";
-            discontext.font = Font.CreateDynamicFontFromOSFont("Anton", 1);
-            discontext.fontStyle = FontStyle.Bold;
+            discontext.font = MenuFontNew;
+            discontext.fontStyle = FontStyles.Bold;
             discontext.color = Theme == 3 ? Black : White;
-            discontext.alignment = TextAnchor.MiddleCenter;
-            discontext.resizeTextForBestFit = true;
-            discontext.resizeTextMinSize = 0;
+            discontext.alignment = TextAlignmentOptions.Center;
+            discontext.enableAutoSizing = true;
+            discontext.fontSizeMin = 0;
             var rectt = discontext.GetComponent<RectTransform>();
             rectt.localScale = new Vector3(0.9f, 0.9f, 0.9f);
             rectt.sizeDelta = new Vector2(0.13f, 0.023f);
@@ -564,15 +412,15 @@ namespace Violet.Menu
             Outline(backToStartButton, violet);
 
             var titleObj = new GameObject { transform = { parent = canvasObj.transform, localScale = new Vector3(0.9f, 0.9f, 0.9f), localPosition = new Vector3(0.85f, 0.85f, 0.85f) } };
-            var title = titleObj.AddComponent<Text>();
-            title.font = ResourceLoader.ArialFont;
-            title.fontStyle = FontStyle.Bold;
+            var title = titleObj.AddComponent<TextMeshPro>();
+            title.font = MenuFontNew;
+            title.fontStyle = FontStyles.Bold;
             title.text = "Home";
             title.color = Theme == 3 ? Black : White;
             title.fontSize = 3;
-            title.alignment = TextAnchor.MiddleCenter;
-            title.resizeTextForBestFit = true;
-            title.resizeTextMinSize = 0;
+            title.alignment = TextAlignmentOptions.Center;
+            title.enableAutoSizing = true;
+            title.fontSizeMin = 0;
             var titleTransform = title.GetComponent<RectTransform>();
             titleTransform.localPosition = Vector3.zero;
             titleTransform.sizeDelta = new Vector2(0.25f, 0.025f);
@@ -593,16 +441,15 @@ namespace Violet.Menu
             PageButtons.GetComponent<Renderer>().material.color = ButtonColorOff;
             PageButtons.AddComponent<BtnCollider>().clickedButton = new ButtonHandler.Button(buttonText, Category.Home, false, false, null, null);
 
-
             var titleObj = new GameObject { transform = { parent = canvasObj.transform, localScale = new Vector3(0.9f, 0.9f, 0.9f) } };
-            var title = titleObj.AddComponent<Text>();
-            title.font = ResourceLoader.ArialFont;
+            var title = titleObj.AddComponent<TextMeshPro>();
+            title.font = MenuFontNew;
             title.color = Theme == 3 ? Black : White;
             title.fontSize = 5;
-            title.fontStyle = FontStyle.Normal;
-            title.alignment = TextAnchor.MiddleCenter;
-            title.resizeTextForBestFit = true;
-            title.resizeTextMinSize = 0;
+            title.fontStyle = FontStyles.Normal;
+            title.alignment = TextAlignmentOptions.Center;
+            title.enableAutoSizing = true;
+            title.fontSizeMin = 0;
             title.text = buttonText.Contains("<") ? "<<<" : ">>>";
             var titleTransform = title.GetComponent<RectTransform>();
             titleTransform.localPosition = Vector3.zero;
@@ -666,14 +513,14 @@ namespace Violet.Menu
             btn.GetComponent<Renderer>().material.color = ButtonColorOff;
 
             var titleObj = new GameObject { transform = { parent = canvasObj.transform, localScale = new Vector3(0.9f, 0.9f, 0.9f), localPosition = new Vector3(0.85f, 0.67f, 0.85f) } };
-            var title = titleObj.AddComponent<Text>();
-            title.fontStyle = FontStyle.BoldAndItalic;
-            title.font = ResourceLoader.MSGothicFont;
+            var title = titleObj.AddComponent<TextMeshPro>();
+            title.fontStyle = TMPro.FontStyles.Bold | TMPro.FontStyles.Italic;
+            title.font = MenuFontNew;
             title.text = name;
             title.color = White;
-            title.alignment = TextAnchor.MiddleCenter;
-            title.resizeTextForBestFit = true;
-            title.resizeTextMinSize = 0;
+            title.alignment = TextAlignmentOptions.Center;
+            title.enableAutoSizing = true;
+            title.fontSizeMin = 0;
             var titleTransform = title.GetComponent<RectTransform>();
             titleTransform.localPosition = Vector3.zero;
             titleTransform.sizeDelta = new Vector2(0.14f, 0.014f);
@@ -769,33 +616,39 @@ namespace Violet.Menu
             }
         }
 
-
         private static void AddModButton(float offset, ButtonHandler.Button button)
         {
             var modButton = ButtonPool.GetButton();
             Destroy(modButton.GetComponent<Rigidbody>());
+
             var btnCollider = modButton.GetComponent<BoxCollider>();
             if (btnCollider != null) btnCollider.isTrigger = true;
+
             modButton.transform.SetParent(menuObj.transform, false);
             modButton.transform.rotation = Quaternion.identity;
             modButton.transform.localScale = new Vector3(0.09f, 0.9f, 0.08f);
             modButton.transform.localPosition = new Vector3(0.56f, 0f, 0.32f - offset);
+
             var btnColScript = modButton.GetComponent<BtnCollider>() ?? modButton.AddComponent<BtnCollider>();
             btnColScript.clickedButton = button;
 
-            var titleObj = TextPool.GetTextObject();
-            titleObj.transform.SetParent(canvasObj.transform, false);
-            titleObj.transform.localScale = new Vector3(0.95f, 0.95f, 1f);
-            var title = titleObj.GetComponent<Text>();
-            title.text = button.buttonText;
-            title.font = ResourceLoader.ArialFont;
-            title.fontStyle = FontStyle.Bold;
-            title.color = Theme == 3 ? Black : White;
-            var titleTransform = title.GetComponent<RectTransform>();
-            titleTransform.localPosition = new Vector3(0.064f, 0, 0.126f - offset / 2.6f);
-            titleTransform.rotation = Quaternion.Euler(180f, 90f, 90f);
-            titleTransform.sizeDelta = new Vector2(0.21f, 0.02225f);
+            // added tmpro (much better text rendering and less performance impact than unity text)
+            TextMeshPro text = new GameObject { transform = { parent = canvasObj.transform } }
+                .AddComponent<TextMeshPro>();
 
+            text.font = MenuFontNew;
+            text.text = button.buttonText;
+            text.fontSize = 1;
+            text.alignment = TextAlignmentOptions.Center;
+            text.enableAutoSizing = true;
+            text.fontSizeMin = 0;
+
+            text.color = Theme == 3 ? Black : White;
+
+            RectTransform textRect = text.GetComponent<RectTransform>();
+            textRect.sizeDelta = new Vector2(0.21f, 0.02225f);
+            textRect.localPosition = new Vector3(0.064f, 0, 0.126f - offset / 2.6f);
+            textRect.rotation = Quaternion.Euler(180f, 90f, 90f);
 
             var btnRenderer = modButton.GetComponent<Renderer>();
             if (btnRenderer != null)
@@ -803,11 +656,12 @@ namespace Violet.Menu
                 btnRenderer.material.color = button.Enabled ? ButtonColorOn : ButtonColorOff;
             }
         }
+        public static TMP_FontAsset MenuFontNew = Resources.Load<TMP_FontAsset>("Fonts & Materials/LiberationSans SDF");       
 
         private static void AddTitleAndFPSCounter()
         {
             fps = Time.deltaTime > 0 ? Mathf.RoundToInt(1f / Time.deltaTime) : 0;
-            title.fontStyle = FontStyle.Bold;
+            title.fontStyle = TMPro.FontStyles.Bold;
             title.text = true
                 ? $"{menuName}\nFPS: {fps} | Version: {menuVersion}"
                 : $"{menuName} [Page: {currentCategoryPage + 1}]\nFPS: {fps} | Version: {menuVersion}";
@@ -1054,5 +908,4 @@ namespace Violet.Menu
         }
         #endregion
     }
-
 }

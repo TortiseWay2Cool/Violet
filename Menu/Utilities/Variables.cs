@@ -7,6 +7,7 @@ using Photon.Realtime;
 using static Violet.Utilities.ColorLib;
 using UnityEngine.Animations.Rigging;
 using Violet.Menu;
+using TMPro;
 
 namespace Violet.Utilities
 {
@@ -24,7 +25,7 @@ namespace Violet.Utilities
         public static GameObject CurrantCatTXT;
         public static GameObject disconnectButton;
         public static GameObject ModButton;
-        public static Text title;
+        public static TextMeshPro title;
         public static float Delay;
 
 

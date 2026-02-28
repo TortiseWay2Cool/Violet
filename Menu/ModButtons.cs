@@ -43,13 +43,13 @@ namespace Violet.Menu
         {
             #region Main Page | Starting Page
             new Button("Settings", Category.Home, false, false, () => ChangePage(Category.Settings)),
-            new Button("Room", Category.Home, false, false, () => ChangePage(Category.Room)),
-            new Button("Safety", Category.Home, false, false, () => ChangePage(Category.Saftey)),
-            new Button("Movement", Category.Home, false, false, () => ChangePage(Category.Movement)),
-            new Button("Player", Category.Home, false, false, () => ChangePage(Category.Player)),
-            new Button("Advantage", Category.Home, false, false, () => ChangePage(Category.Advantage)),
-            new Button("Visuals", Category.Home, false, false, () => ChangePage(Category.Visuals)),
             new Button("Overpowered", Category.Home, false, false, () => ChangePage(Category.Overpowered)),
+            new Button("Advantage", Category.Home, false, false, () => ChangePage(Category.Advantage)),
+            new Button("Movement", Category.Home, false, false, () => ChangePage(Category.Movement)),
+            new Button("Visuals", Category.Home, false, false, () => ChangePage(Category.Visuals)),
+            new Button("Safety", Category.Home, false, false, () => ChangePage(Category.Saftey)),
+            new Button("Room", Category.Home, false, false, () => ChangePage(Category.Room)),
+            new Button("Player", Category.Home, false, false, () => ChangePage(Category.Player)),
             new Button("Projectiles", Category.Home, false, false, () => ChangePage(Category.Projectiles)),
             new Button("Soundboard", Category.Home, false, false, () => ChangePage(Category.SoundBoard)),
             #endregion

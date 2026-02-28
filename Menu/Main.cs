@@ -12,6 +12,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
 using Violet.GUI;
 using Violet.Initialization;
 using Violet.Menu;
@@ -37,7 +38,7 @@ namespace Violet.Menu
         private static bool isInMenuCondition;
         private static GameObject thirdPersonCamera;
         private static GameObject cm;
-
+        public static bool RoundedMenuEnabled = true;
         public void Update()
         {
             UpdateNotificationsAndButtons();
@@ -209,6 +210,13 @@ namespace Violet.Menu
 
             SaveStringArrayToFile(enabledButtonTexts);
         }
+        public static void ToggleRoundedMenu()
+        {
+            RoundedMenuEnabled = !RoundedMenuEnabled;
+            Draw(); // btw Draw destroys the menu and creates a new one so we dont have to destroy it here.
+
+
+        }
 
         public static void SaveStringArrayToFile(string[] data)
         {
@@ -301,14 +309,77 @@ namespace Violet.Menu
             }
         }
 
-        private static void CreateMenuObject()
-        {
-            menuObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            Destroy(menuObj.GetComponent<Renderer>());
-            menuObj.name = "menu";
-            menuObj.transform.localScale = new Vector3(0.1f, 0.3f, 0.3825f);
-            menuObj.AddComponent<BoxCollider>();
+        private static void CreateMenuObject() 
+        { 
+            menuObj = GameObject.CreatePrimitive(PrimitiveType.Cube); 
+            Destroy(menuObj.GetComponent<Renderer>()); menuObj.name = "menu"; 
+            menuObj.transform.localScale = new Vector3(0.1f, 0.3f, 0.3825f); 
+            menuObj.AddComponent<BoxCollider>();           
         }
+        public static void RoundMenuObject(GameObject toRound, float Bevel = 0.02f)
+        {
+
+            Renderer ToRoundRenderer = toRound.GetComponent<Renderer>();
+            GameObject BaseA = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            BaseA.GetComponent<Renderer>().enabled = ToRoundRenderer.enabled;
+            Destroy(BaseA.GetComponent<Collider>());
+
+            BaseA.transform.parent = menuObj.transform;
+            BaseA.transform.rotation = Quaternion.identity;
+            BaseA.transform.localPosition = toRound.transform.localPosition;
+            BaseA.transform.localScale = toRound.transform.localScale + new Vector3(0f, Bevel * -2.55f, 0f);
+
+            GameObject BaseB = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            BaseB.GetComponent<Renderer>().enabled = ToRoundRenderer.enabled;
+            Destroy(BaseB.GetComponent<Collider>());
+
+            BaseB.transform.parent = menuObj.transform;
+            BaseB.transform.rotation = Quaternion.identity;
+            BaseB.transform.localPosition = toRound.transform.localPosition;
+            BaseB.transform.localScale = toRound.transform.localScale + new Vector3(0f, 0f, -Bevel * 2f);
+
+            GameObject RoundCornerA = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            RoundCornerA.GetComponent<Renderer>().enabled = ToRoundRenderer.enabled;
+            Destroy(RoundCornerA.GetComponent<Collider>());
+
+            RoundCornerA.transform.parent = menuObj.transform;
+            RoundCornerA.transform.rotation = Quaternion.identity * Quaternion.Euler(0f, 0f, 90f);
+
+            RoundCornerA.transform.localPosition = toRound.transform.localPosition + new Vector3(0f, toRound.transform.localScale.y / 2f - Bevel * 1.275f, toRound.transform.localScale.z / 2f - Bevel);
+            RoundCornerA.transform.localScale = new Vector3(Bevel * 2.55f, toRound.transform.localScale.x / 2f, Bevel * 2f);
+
+            GameObject RoundCornerB = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            RoundCornerB.GetComponent<Renderer>().enabled = ToRoundRenderer.enabled;
+            Destroy(RoundCornerB.GetComponent<Collider>());
+
+            RoundCornerB.transform.parent = menuObj.transform;
+            RoundCornerB.transform.rotation = Quaternion.identity * Quaternion.Euler(0f, 0f, 90f);
+
+            RoundCornerB.transform.localPosition = toRound.transform.localPosition + new Vector3(0f, -(toRound.transform.localScale.y / 2f) + Bevel * 1.275f, toRound.transform.localScale.z / 2f - Bevel);
+            RoundCornerB.transform.localScale = new Vector3(Bevel * 2.55f, toRound.transform.localScale.x / 2f, Bevel * 2f);
+
+            GameObject RoundCornerC = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            RoundCornerC.GetComponent<Renderer>().enabled = ToRoundRenderer.enabled;
+            Destroy(RoundCornerC.GetComponent<Collider>());
+
+            RoundCornerC.transform.parent = menuObj.transform;
+            RoundCornerC.transform.rotation = Quaternion.identity * Quaternion.Euler(0f, 0f, 90f);
+
+            RoundCornerC.transform.localPosition = toRound.transform.localPosition + new Vector3(0f, toRound.transform.localScale.y / 2f - Bevel * 1.275f, -(toRound.transform.localScale.z / 2f) + Bevel);
+            RoundCornerC.transform.localScale = new Vector3(Bevel * 2.55f, toRound.transform.localScale.x / 2f, Bevel * 2f);
+
+            GameObject RoundCornerD = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            RoundCornerD.GetComponent<Renderer>().enabled = ToRoundRenderer.enabled;
+            Destroy(RoundCornerD.GetComponent<Collider>());
+
+            RoundCornerD.transform.parent = menuObj.transform;
+            RoundCornerD.transform.rotation = Quaternion.identity * Quaternion.Euler(0f, 0f, 90f);
+
+            RoundCornerD.transform.localPosition = toRound.transform.localPosition + new Vector3(0f, -(toRound.transform.localScale.y / 2f) + Bevel * 1.275f, -(toRound.transform.localScale.z / 2f) + Bevel);
+            RoundCornerD.transform.localScale = new Vector3(Bevel * 2.55f, toRound.transform.localScale.x / 2f, Bevel * 2f);
+
+            ToRoundRenderer.enabled = false;
+        }      
 
         private static void CreateBackground()
         {
@@ -322,6 +393,8 @@ namespace Violet.Menu
             background.transform.localScale = new Vector3(0.11f, 0.97f, 1.03f);
             background.name = "menucolor";
             background.transform.position = new Vector3(0.05f, 0f, -0f);
+            if (RoundedMenuEnabled)
+                RoundMenuObject(background);
         }
 
         private static void CreateMenuCanvasAndTitle()
@@ -616,9 +689,10 @@ namespace Violet.Menu
             }
         }
 
+        public static GameObject modButton = null;
         private static void AddModButton(float offset, ButtonHandler.Button button)
         {
-            var modButton = ButtonPool.GetButton();
+            modButton = ButtonPool.GetButton();
             Destroy(modButton.GetComponent<Rigidbody>());
 
             var btnCollider = modButton.GetComponent<BoxCollider>();
@@ -655,6 +729,74 @@ namespace Violet.Menu
             {
                 btnRenderer.material.color = button.Enabled ? ButtonColorOn : ButtonColorOff;
             }
+
+            if (RoundedMenuEnabled)
+            {
+                RoundModButton(modButton, 0.025f);
+            }
+        }
+
+        public static void RoundModButton(GameObject toRound, float Bevel = 0.02f)
+        {
+            if (toRound == null) return;
+
+            var origRenderer = toRound.GetComponent<MeshRenderer>() ?? toRound.GetComponentInChildren<MeshRenderer>();
+            if (origRenderer == null) return;
+
+            var parent = toRound.transform.parent != null ? toRound.transform.parent : menuObj?.transform ?? toRound.transform;
+
+            Material pieceMaterial;
+            if (origRenderer.sharedMaterial != null)
+            {
+                pieceMaterial = UnityEngine.Object.Instantiate(origRenderer.sharedMaterial);
+            }
+            else
+            {
+                pieceMaterial = new Material(Shader.Find("Standard"));
+                pieceMaterial.color = Color.white;
+            }
+
+            GameObject CreatePiece(PrimitiveType type, string name)
+            {
+                var go = GameObject.CreatePrimitive(type);
+                UnityEngine.Object.Destroy(go.GetComponent<Collider>());
+                var mr = go.GetComponent<MeshRenderer>();
+                if (mr != null) mr.sharedMaterial = pieceMaterial;
+                go.name = $"rounded_{name}";
+                go.transform.SetParent(parent, false);
+                return go;
+            }
+
+            GameObject BaseA = CreatePiece(PrimitiveType.Cube, "baseA");
+            BaseA.transform.localRotation = toRound.transform.localRotation;
+            BaseA.transform.localPosition = toRound.transform.localPosition;
+            BaseA.transform.localScale = toRound.transform.localScale + new Vector3(0f, Bevel * -2.55f, 0f);
+            GameObject BaseB = CreatePiece(PrimitiveType.Cube, "baseB");
+            BaseB.transform.localRotation = toRound.transform.localRotation;
+            BaseB.transform.localPosition = toRound.transform.localPosition;
+            BaseB.transform.localScale = toRound.transform.localScale + new Vector3(0f, 0f, -Bevel * 2f);
+
+            GameObject RoundCornerA = CreatePiece(PrimitiveType.Cylinder, "cornerA");
+            RoundCornerA.transform.localRotation = Quaternion.Euler(0f, 0f, 90f) * toRound.transform.localRotation;
+            RoundCornerA.transform.localPosition = toRound.transform.localPosition + new Vector3(0f, toRound.transform.localScale.y / 2f - Bevel * 1.275f, toRound.transform.localScale.z / 2f - Bevel);
+            RoundCornerA.transform.localScale = new Vector3(Bevel * 2.55f, toRound.transform.localScale.x / 2f, Bevel * 2f);
+
+            GameObject RoundCornerB = CreatePiece(PrimitiveType.Cylinder, "cornerB");
+            RoundCornerB.transform.localRotation = Quaternion.Euler(0f, 0f, 90f) * toRound.transform.localRotation;
+            RoundCornerB.transform.localPosition = toRound.transform.localPosition + new Vector3(0f, -(toRound.transform.localScale.y / 2f) + Bevel * 1.275f, toRound.transform.localScale.z / 2f - Bevel);
+            RoundCornerB.transform.localScale = new Vector3(Bevel * 2.55f, toRound.transform.localScale.x / 2f, Bevel * 2f);
+
+            GameObject RoundCornerC = CreatePiece(PrimitiveType.Cylinder, "cornerC");
+            RoundCornerC.transform.localRotation = Quaternion.Euler(0f, 0f, 90f) * toRound.transform.localRotation;
+            RoundCornerC.transform.localPosition = toRound.transform.localPosition + new Vector3(0f, toRound.transform.localScale.y / 2f - Bevel * 1.275f, -(toRound.transform.localScale.z / 2f) + Bevel);
+            RoundCornerC.transform.localScale = new Vector3(Bevel * 2.55f, toRound.transform.localScale.x / 2f, Bevel * 2f);
+
+            GameObject RoundCornerD = CreatePiece(PrimitiveType.Cylinder, "cornerD");
+            RoundCornerD.transform.localRotation = Quaternion.Euler(0f, 0f, 90f) * toRound.transform.localRotation;
+            RoundCornerD.transform.localPosition = toRound.transform.localPosition + new Vector3(0f, -(toRound.transform.localScale.y / 2f) + Bevel * 1.275f, -(toRound.transform.localScale.z / 2f) + Bevel);
+            RoundCornerD.transform.localScale = new Vector3(Bevel * 2.55f, toRound.transform.localScale.x / 2f, Bevel * 2f);
+
+            origRenderer.enabled = false;
         }
         public static TMP_FontAsset MenuFontNew = Resources.Load<TMP_FontAsset>("Fonts & Materials/LiberationSans SDF");       
 
@@ -677,7 +819,6 @@ namespace Violet.Menu
             outlineObj.transform.localPosition = obj.transform.localPosition;
             outlineObj.transform.localScale = obj.transform.localScale + new Vector3(-0.01f, 0.0145f, 0.0145f);
             outlineObj.GetComponent<MeshRenderer>().material.color = outColor;
-
         }
 
         private static void PositionMenuForHand()

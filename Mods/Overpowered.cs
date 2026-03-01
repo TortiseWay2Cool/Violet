@@ -131,6 +131,7 @@ namespace Violet.Mods
             {
                 PhotonNetwork.CurrentRoom.LoadBalancingClient.OpRaiseEvent(202, hashtable, new RaiseEventOptions
                 {
+                    d
                     TargetActors = new int[]
                     {
                         PhotonNetwork.MasterClient.ActorNumber

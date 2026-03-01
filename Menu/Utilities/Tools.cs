@@ -34,7 +34,7 @@ namespace VioletPaid.Utilities
             {
                 if (Time.time > Tools.delay)
                 {
-                    Tools.delay = Time.time + 0.1f;
+                    Tools.delay = Time.time + 0.4f;
                     Tools.KawaiiRPC();
                 }
             }

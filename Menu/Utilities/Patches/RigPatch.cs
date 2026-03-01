@@ -20,4 +20,12 @@ namespace Violet.Utilities.Patches
             return !rig.isOfflineVRRig;
         }
     }
+
+
+    [HarmonyPatch(typeof(VRRig), "PostTick")]
+    public class PostTick
+    {
+        public static bool Prefix(VRRig __instance) =>
+            !__instance.isLocal || __instance.enabled;
+    }
 }

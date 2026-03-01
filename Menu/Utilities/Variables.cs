@@ -32,12 +32,17 @@ namespace Violet.Utilities
 
         public static int Theme = 0;
         public static Color MenuColor = Black;
-        public static Color MenuColorT = MenuColor;
-        public static Color ButtonColorOff = ColorLib.Violet;
-        public static Color ButtonColorOn = Indigo;
-        public static Color DisconnectColor = ColorLib.Violet;
+
+        public static Color ButtonColorOff = new Color32(30, 30, 30, 255); 
+        public static Color ButtonColorOn = Indigo; 
+
+        public static Color DisconnectColor = ColorLib.HotPink; 
+        public static Color AddonsColor = new Color32(30, 30, 30, 255);
+
+        public static Color ButtontextColor = Color.darkViolet;
+        public static Color AddonsTextColor = Color.deepPink;
         public static Color outColor = ColorLib.Violet;
-        public static Color disOut = WineRed;
+
         public static bool RainbowOutline = true;
         public static bool gravity;
         public static bool bark;

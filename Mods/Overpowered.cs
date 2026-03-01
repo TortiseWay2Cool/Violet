@@ -89,73 +89,50 @@ namespace Violet.Mods
         }
 
 
-        public static void Lag(int Index)
-        {
-            if (Index == 0)
-            {
-                Hashtable c = new Hashtable();
-                c[0] = "GameMode";
-                c[5] = new int[] { UnityEngine.Random.Range(int.MinValue, int.MaxValue) };
-                c[6] = PhotonNetwork.ServerTimestamp;
-                c[7] = 2;
-                if (Time.time > Variables.Delay)
-                {
-                    Variables.Delay = Time.time + 1.2f;
-                    for (int i = 0; i < 520; i++)
-                    {
-                        PhotonNetwork.CurrentRoom.LoadBalancingClient.OpRaiseEvent(202, c, new RaiseEventOptions()
-                        {
-                            Receivers = ReceiverGroup.Others,
-                            CachingOption = EventCaching.AddToRoomCacheGlobal
-                        }, SendOptions.SendUnreliable);
-
-                    }
-                    PhotonNetwork.CurrentRoom.LoadBalancingClient.LoadBalancingPeer.SendOutgoingCommands();
-                    PhotonNetwork.SendAllOutgoingCommands();
-                }
-            }
-
-        }
         public static void KickMaster()
         {
-            Hashtable hashtable = new Hashtable();
-            hashtable[0] = "GameMode";
-            hashtable[4] = new int[]
+            if (PhotonNetwork.InRoom)
             {
-                PhotonNetwork.AllocateViewID(0)
-            };
-            hashtable[6] = PhotonNetwork.ServerTimestamp;
-            hashtable[7] = PhotonNetwork.AllocateViewID(0);
-
-            for (int i = 0; i < 3; i++)
-            {
-                PhotonNetwork.CurrentRoom.LoadBalancingClient.OpRaiseEvent(202, hashtable, new RaiseEventOptions
+                Visuals.MasterChams();
+                Hashtable hashtable = new Hashtable();
+                hashtable[0] = "GameMode";
+                hashtable[4] = new int[]
                 {
-                    TargetActors = new int[]
-                    {
-                        PhotonNetwork.MasterClient.ActorNumber
-                    },
-                    CachingOption = 0
-                }, SendOptions.SendUnreliable);
-            }
+                PhotonNetwork.AllocateViewID(0)
+                };
+                hashtable[6] = PhotonNetwork.ServerTimestamp;
+                hashtable[7] = PhotonNetwork.AllocateViewID(0);
 
-            PhotonNetwork.CurrentRoom.LoadBalancingClient.LoadBalancingPeer.SendOutgoingCommands();
-            PhotonNetwork.SendAllOutgoingCommands();
-            Tools.AutoFlushRPCS();
+                for (int i = 0; i < 3; i++)
+                {
+                    PhotonNetwork.CurrentRoom.LoadBalancingClient.OpRaiseEvent(202, hashtable, new RaiseEventOptions
+                    {
+                        TargetActors = new int[]
+                        {
+                            PhotonNetwork.MasterClient.ActorNumber
+                        },
+                        CachingOption = EventCaching.DoNotCache
+                    }, SendOptions.SendUnreliable);
+                }
+
+                PhotonNetwork.CurrentRoom.LoadBalancingClient.LoadBalancingPeer.SendOutgoingCommands();
+                PhotonNetwork.SendAllOutgoingCommands();
+                Tools.AutoFlushRPCS();
+            }
         }
 
         public static void KickMasterGun()
         {
-            GunLib.MakeGun(true, () =>
+            if (PhotonNetwork.InRoom)
             {
-                if (PhotonNetwork.InRoom)
+                Visuals.MasterChams();
+                GunLib.MakeGun(true, () =>
                 {
-
                     Hashtable hashtable = new Hashtable();
                     hashtable[0] = "GameMode";
                     hashtable[4] = new int[]
                     {
-                        PhotonNetwork.AllocateViewID(0)
+                    PhotonNetwork.AllocateViewID(0)
                     };
                     hashtable[6] = PhotonNetwork.ServerTimestamp;
                     hashtable[7] = PhotonNetwork.AllocateViewID(0);
@@ -166,28 +143,31 @@ namespace Violet.Mods
                         {
                             TargetActors = new int[]
                             {
-                        PhotonNetwork.MasterClient.ActorNumber
+                                GunLib.LockedRig.creator.ActorNumber
                             },
-                            CachingOption = 0
+                            CachingOption = EventCaching.DoNotCache
                         }, SendOptions.SendUnreliable);
                     }
 
                     PhotonNetwork.CurrentRoom.LoadBalancingClient.LoadBalancingPeer.SendOutgoingCommands();
                     PhotonNetwork.SendAllOutgoingCommands();
                     Tools.AutoFlushRPCS();
-                }
-            });
+                });
+            }
         }
 
         public static void SlowSetMaster()
         {
-            if (!PhotonNetwork.IsMasterClient)
+            if (PhotonNetwork.InRoom)
             {
-                Overpowered.KickMaster();
+                if (PhotonNetwork.MasterClient.ActorNumber != PhotonNetwork.LocalPlayer.ActorNumber)
+                {
+                    Overpowered.KickMaster();
+                }
             }
         }
 
-        public static void Lag2(int options)
+        public static void Lag(int options)
         {
             Hashtable table = new Hashtable();
             table[0] = "GameMode";
@@ -206,7 +186,7 @@ namespace Violet.Mods
                     {
                         PhotonNetwork.CurrentRoom.LoadBalancingClient.OpRaiseEvent(202, table, new RaiseEventOptions
                         {
-                            Receivers = 0
+                            Receivers = ReceiverGroup.Others
                         }, SendOptions.SendUnreliable);
                     }
                     PhotonNetwork.CurrentRoom.LoadBalancingClient.LoadBalancingPeer.SendOutgoingCommands();

@@ -43,12 +43,12 @@ namespace Violet.GUI
 
 
         private const int GradientHeight = 600;
-        private const float WiggleAmplitude = 10f;
+        private const float WiggleAmplitude = 0f;
         private const float WiggleSpeed = 1f;
         private const float DisplayDuration = 2f;
         private const float MoveDuration = 1.5f;
         private const float LineAnimSpeed = 300f;
-        private const string ImageUrl = "https://i.ibb.co/Q35CRZpP/image-Photoroom-1.png";
+        private const string ImageUrl = "https://i.ibb.co/9HKmSs8d/violet.png";
 
         private Texture2D rgbGradientTex;
         private static Texture2D downloadedImage;
@@ -172,8 +172,8 @@ namespace Violet.GUI
             moveProgress = 0f;
             imageDisplayStartTime = Time.time;
 
-            const float bigScale = 1f;
-            const float smallScale = 0.4f;
+            const float bigScale = 2.6f;
+            const float smallScale = 1;
 
             if (downloadedImage != null)
             {

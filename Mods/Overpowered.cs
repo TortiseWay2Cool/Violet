@@ -98,10 +98,20 @@ namespace Violet.Mods
                 hashtable[0] = "GameMode";
                 hashtable[4] = new int[]
                 {
+<<<<<<< HEAD
                 PhotonNetwork.AllocateViewID(0)
                 };
                 hashtable[6] = PhotonNetwork.ServerTimestamp;
                 hashtable[7] = PhotonNetwork.AllocateViewID(0);
+=======
+                    TargetActors = new int[]
+                    {
+                        PhotonNetwork.MasterClient.ActorNumber
+                    },
+                    CachingOption = EventCaching.DoNotCache
+                }, SendOptions.SendUnreliable);
+            }
+>>>>>>> e83b9e9 (Test)
 
                 for (int i = 0; i < 3; i++)
                 {

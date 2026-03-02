@@ -39,7 +39,7 @@ namespace Violet.Menu
         public static GameObject thirdPersonCamera;
         private static GameObject cm;
         public static bool RoundedMenuEnabled = true;
-        public static bool RoundedMenuButtonsEnabled = false;
+        public static bool RoundedMenuButtonsEnabled = true;
         public void Update()
         {
             UpdateNotificationsAndButtons();
@@ -198,6 +198,7 @@ namespace Violet.Menu
             pollerInstance = ControllerInputPoller.instance;
             thirdPersonCamera = GameObject.Find("Player Objects/Third Person Camera/Shoulder Camera");
             cm = GameObject.Find("Player Objects/Third Person Camera/Shoulder Camera/CM vcam1");
+            MenuFontNew = GameObject.Find("Environment Objects/LocalObjects_Prefab/TreeRoom/motdHeadingText").GetComponent<TextMeshPro>().font;
         }
 
         public static void SaveConfigs()
@@ -306,16 +307,16 @@ namespace Violet.Menu
             var buttonsToDraw = GetButtonInfoByPage(currentPage).Skip(currentCategoryPage * ButtonsPerPage).Take(ButtonsPerPage).ToArray();
             for (int i = 0; i < buttonsToDraw.Length; i++)
             {
-                AddModButton(i * 0.09f, buttonsToDraw[i]);
+                AddModButton(i * 0.1f, buttonsToDraw[i]);
             }
         }
 
-        private static void CreateMenuObject() 
-        { 
-            menuObj = GameObject.CreatePrimitive(PrimitiveType.Cube); 
-            Destroy(menuObj.GetComponent<Renderer>()); menuObj.name = "menu"; 
-            menuObj.transform.localScale = new Vector3(0.1f, 0.3f, 0.3825f); 
-            menuObj.AddComponent<BoxCollider>();           
+        private static void CreateMenuObject()
+        {
+            menuObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            Destroy(menuObj.GetComponent<Renderer>()); menuObj.name = "menu";
+            menuObj.transform.localScale = new Vector3(0.1f, 0.3f, 0.3825f);
+            menuObj.AddComponent<BoxCollider>();
         }
         public static void RoundMenuObject(GameObject toRound, float Bevel = 0.02f)
         {
@@ -380,7 +381,7 @@ namespace Violet.Menu
             RoundCornerD.transform.localScale = new Vector3(Bevel * 2.55f, toRound.transform.localScale.x / 2f, Bevel * 2f);
 
             ToRoundRenderer.enabled = false;
-        }      
+        }
 
         private static void CreateBackground()
         {
@@ -398,7 +399,7 @@ namespace Violet.Menu
                 RoundMenuObject(background);
         }
 
-        private static void CreateMenuCanvasAndTitle()
+        private static void CreateMenuCanvasAndTitle() // kinda fucked up i will fix this stuff later
         {
             canvasObj = new GameObject { name = "canvas" };
             canvasObj.transform.parent = menuObj.transform;
@@ -415,25 +416,50 @@ namespace Violet.Menu
                 transform =
                 {
                     parent = canvasObj.transform,
-                    localScale = new Vector3(0.875f, 0.875f, 1f)
+                    localScale = new Vector3(0.875f / 1.5f, 0.875f / 1.5f, 1f)
+                }
+            };
+
+            var InfoObj = new GameObject
+            {
+                transform =
+                {
+                    parent = canvasObj.transform,
+                    localScale = new Vector3(0.875f / 1.5f, 0.875f / 1.5f, 1f)
                 }
             };
 
             title = titleObj.AddComponent<TextMeshPro>();
 
-            title.font = MenuFontNew; 
+            title.font = MenuFontNew;
             title.fontStyle = FontStyles.Bold;
             title.color = Theme == 3 ? Black : White;
-            title.fontSize = 7;
+            title.fontSize = 0.2f;
             title.alignment = TextAlignmentOptions.Center;
-            title.enableAutoSizing = true;
+            title.enableAutoSizing = false;
             title.fontSizeMin = 0;
 
             RectTransform titleTransform = title.GetComponent<RectTransform>();
             titleTransform.localPosition = Vector3.zero;
-            titleTransform.position = new Vector3(0.07f, 0f, 0.17f);
+            titleTransform.position = new Vector3(0.06f, 0f, 0.16f);
             titleTransform.rotation = Quaternion.Euler(180f, 90f, 90f);
-            titleTransform.sizeDelta = new Vector2(0.21f, 0.065f);
+            titleTransform.sizeDelta = new Vector2(0.4f, 0.065f);
+
+            var info = InfoObj.AddComponent<TextMeshPro>();
+            info.text = "Violet";
+            info.font = MenuFontNew;
+            info.fontStyle = FontStyles.Bold;
+            info.color = Theme == 3 ? Black : White;
+            info.fontSize = 0.5f;
+            info.alignment = TextAlignmentOptions.Center;
+            info.enableAutoSizing = false;
+            info.fontSizeMin = 0;
+
+            RectTransform InfoTransform = info.GetComponent<RectTransform>();
+            InfoTransform.localPosition = Vector3.zero;
+            InfoTransform.position = new Vector3(0.09f, 0f, 0.17f);
+            InfoTransform.rotation = Quaternion.Euler(180f, 90f, 90f);
+            InfoTransform.sizeDelta = new Vector2(0.3f, 0.065f);
         }
 
         private static void AddDisconnectButton()
@@ -475,25 +501,24 @@ namespace Violet.Menu
             var backToStartButton = GameObject.CreatePrimitive(PrimitiveType.Cube);
             Destroy(backToStartButton.GetComponent<Rigidbody>());
             backToStartButton.GetComponent<BoxCollider>().isTrigger = true;
-            Outline(backToStartButton, violet);
+            Outline(backToStartButton, AddonsTextColor);
             backToStartButton.transform.parent = menuObj.transform;
             backToStartButton.transform.rotation = Quaternion.identity;
             backToStartButton.transform.localScale = new Vector3(0.09f, 0.30625f, 0.08f);
             backToStartButton.transform.localPosition = new Vector3(0.56f, 0f, -0.435f);
             backToStartButton.AddComponent<BtnCollider>().clickedButton = new ButtonHandler.Button("ReturnButton", Category.Home, false, false, null, null);
-            backToStartButton.GetComponent<Renderer>().material.color = ButtonColorOff;
+            backToStartButton.GetComponent<Renderer>().material.color = AddonsColor;
 
-            Outline(backToStartButton, violet);
 
             var titleObj = new GameObject { transform = { parent = canvasObj.transform, localScale = new Vector3(0.9f, 0.9f, 0.9f), localPosition = new Vector3(0.85f, 0.85f, 0.85f) } };
             var title = titleObj.AddComponent<TextMeshPro>();
             title.font = MenuFontNew;
             title.fontStyle = FontStyles.Bold;
             title.text = "Home";
-            title.color = Theme == 3 ? Black : White;
-            title.fontSize = 3;
+            title.color = AddonsTextColor;
+            title.fontSize = 0.2f;
             title.alignment = TextAlignmentOptions.Center;
-            title.enableAutoSizing = true;
+            title.enableAutoSizing = false;
             title.fontSizeMin = 0;
             var titleTransform = title.GetComponent<RectTransform>();
             titleTransform.localPosition = Vector3.zero;
@@ -506,23 +531,23 @@ namespace Violet.Menu
         {
             PageButtons = GameObject.CreatePrimitive(PrimitiveType.Cube);
             Destroy(PageButtons.GetComponent<Rigidbody>());
-            Outline(PageButtons, DarkerGrey);
+            Outline(PageButtons, AddonsTextColor);
             PageButtons.GetComponent<BoxCollider>().isTrigger = true;
             PageButtons.transform.parent = menuObj.transform;
             PageButtons.transform.rotation = Quaternion.identity;
             PageButtons.transform.localScale = new Vector3(0.09f, 0.25f, 0.079f);
             PageButtons.transform.localPosition = new Vector3(0.56f, buttonText.Contains("<") ? 0.2925f : -0.2925f, -0.435f);
-            PageButtons.GetComponent<Renderer>().material.color = ButtonColorOff;
+            PageButtons.GetComponent<Renderer>().material.color = AddonsColor;
             PageButtons.AddComponent<BtnCollider>().clickedButton = new ButtonHandler.Button(buttonText, Category.Home, false, false, null, null);
 
             var titleObj = new GameObject { transform = { parent = canvasObj.transform, localScale = new Vector3(0.9f, 0.9f, 0.9f) } };
             var title = titleObj.AddComponent<TextMeshPro>();
             title.font = MenuFontNew;
-            title.color = Theme == 3 ? Black : White;
-            title.fontSize = 5;
+            title.color = AddonsTextColor;
+            title.fontSize = 0.2f;
             title.fontStyle = FontStyles.Normal;
             title.alignment = TextAlignmentOptions.Center;
-            title.enableAutoSizing = true;
+            title.enableAutoSizing = false;
             title.fontSizeMin = 0;
             title.text = buttonText.Contains("<") ? "<<<" : ">>>";
             var titleTransform = title.GetComponent<RectTransform>();
@@ -569,7 +594,7 @@ namespace Violet.Menu
                 DrawCategoryTab(4f, 0.148f, "SoundBoard", () => ChangePage(Category.SoundBoard));
                 DrawCategoryTab(9f, 0.339f, "Back Page", () => PgNumber = 0);
             }*/
-            
+
         }
 
         private static void DrawCategoryTab(float multiplier, float textOffset, string name, Action action)
@@ -695,15 +720,12 @@ namespace Violet.Menu
         {
             modButton = ButtonPool.GetButton();
             Destroy(modButton.GetComponent<Rigidbody>());
-
             var btnCollider = modButton.GetComponent<BoxCollider>();
             if (btnCollider != null) btnCollider.isTrigger = true;
-
-            modButton.transform.SetParent(menuObj.transform, false);
+            modButton.transform.parent = menuObj.transform;
             modButton.transform.rotation = Quaternion.identity;
             modButton.transform.localScale = new Vector3(0.09f, 0.9f, 0.08f);
-            modButton.transform.localPosition = new Vector3(0.56f, 0f, 0.32f - offset);
-
+            modButton.transform.localPosition = new Vector3(0.56f, 0f, 0.36f - offset);
             var btnColScript = modButton.GetComponent<BtnCollider>() ?? modButton.AddComponent<BtnCollider>();
             btnColScript.clickedButton = button;
 
@@ -718,11 +740,11 @@ namespace Violet.Menu
             text.enableAutoSizing = true;
             text.fontSizeMin = 0;
 
-            text.color = Theme == 3 ? Black : White;
+            text.color = ButtontextColor;
 
             RectTransform textRect = text.GetComponent<RectTransform>();
             textRect.sizeDelta = new Vector2(0.21f, 0.02225f);
-            textRect.localPosition = new Vector3(0.064f, 0, 0.126f - offset / 2.6f);
+            textRect.localPosition = new Vector3(0.064f, 0, 0.14f - offset / 2.6f);
             textRect.rotation = Quaternion.Euler(180f, 90f, 90f);
 
             var btnRenderer = modButton.GetComponent<Renderer>();
@@ -733,7 +755,7 @@ namespace Violet.Menu
 
             if (RoundedMenuButtonsEnabled)
             {
-                RoundModButton(modButton, 0.025f);
+                RoundModButton(modButton, 0.008f);
             }
         }
 
@@ -799,14 +821,14 @@ namespace Violet.Menu
 
             origRenderer.enabled = false;
         }
-        public static TMP_FontAsset MenuFontNew = Resources.Load<TMP_FontAsset>("Fonts & Materials/LiberationSans SDF");       
+        public static TMP_FontAsset MenuFontNew;
 
         private static void AddTitleAndFPSCounter()
         {
             fps = Time.deltaTime > 0 ? Mathf.RoundToInt(1f / Time.deltaTime) : 0;
             title.fontStyle = TMPro.FontStyles.Bold;
             title.text = true
-                ? $"{menuName}\nFPS: {fps} | Version: {menuVersion}"
+                ? $"FPS: {fps} | Version: {menuVersion}"
                 : $"{menuName} [Page: {currentCategoryPage + 1}]\nFPS: {fps} | Version: {menuVersion}";
         }
 
@@ -819,7 +841,7 @@ namespace Violet.Menu
             outlineObj.transform.rotation = Quaternion.identity;
             outlineObj.transform.localPosition = obj.transform.localPosition;
             outlineObj.transform.localScale = obj.transform.localScale + new Vector3(-0.01f, 0.0145f, 0.0145f);
-            outlineObj.GetComponent<MeshRenderer>().material.color = outColor;
+            outlineObj.GetComponent<MeshRenderer>().material.color = color;
         }
 
         private static void PositionMenuForHand()
@@ -911,53 +933,48 @@ namespace Violet.Menu
                     ButtonHandler.ChangeButtonText("Current Menu Theme", "Current Menu Theme [Base]");
                     break;
                 case 1:
-                    MenuColorT = SkyBlueTransparent;
                     MenuColor = SkyBlue;
                     ButtonColorOff = RoyalBlue;
                     ButtonColorOn = DodgerBlue;
                     outColor = DarkDodgerBlue;
                     DisconnectColor = Crimson;
-                    disOut = WineRed;
+                    AddonsColor = WineRed;
                     ButtonHandler.ChangeButtonText("Current Menu Theme", "Current Menu Theme [Blue]");
                     break;
                 case 2:
-                    MenuColorT = FireBrickTransparent;
                     MenuColor = FireBrick;
                     ButtonColorOff = WineRed;
                     ButtonColorOn = IndianRed;
                     outColor = IndianRed;
                     DisconnectColor = Crimson;
-                    disOut = WineRed;
+                    AddonsColor = WineRed;
                     ButtonHandler.ChangeButtonText("Current Menu Theme", "Current Menu Theme [Red]");
                     break;
                 case 3:
-                    MenuColorT = new Color32(171, 129, 182, 80);
                     MenuColor = new Color32(171, 129, 182, 255);
                     ButtonColorOff = Plum;
                     ButtonColorOn = MediumOrchid;
                     outColor = DarkSlateBlue;
                     DisconnectColor = ButtonColorOff;
-                    disOut = outColor;
+                    AddonsColor = outColor;
                     ButtonHandler.ChangeButtonText("Current Menu Theme", "Current Menu Theme [Lavender]");
                     break;
                 case 4:
-                    MenuColorT = MediumAquamarineTransparent;
                     MenuColor = MediumAquamarine;
                     ButtonColorOff = MediumSeaGreen;
                     ButtonColorOn = SeaGreen;
                     DisconnectColor = ButtonColorOff;
                     outColor = Lime;
-                    disOut = outColor;
+                    AddonsColor = outColor;
                     ButtonHandler.ChangeButtonText("Current Menu Theme", "Current Menu Theme [Green]");
                     break;
                 case 5:
-                    MenuColorT = BlackTransparent;
                     MenuColor = Black;
                     ButtonColorOff = DarkerGrey;
                     ButtonColorOn = WineRed;
                     DisconnectColor = WineRed;
                     outColor = DarkDodgerBlue;
-                    disOut = Maroon;
+                    AddonsColor = Maroon;
                     ButtonHandler.ChangeButtonText("Current Menu Theme", "Current Menu Theme [Dark]");
                     break;
             }
@@ -967,12 +984,11 @@ namespace Violet.Menu
         private static void SetDefaultTheme()
         {
             MenuColor = Black;
-            MenuColorT = MenuColor;
             ButtonColorOff = ColorLib.Violet;
             ButtonColorOn = Indigo;
             DisconnectColor = violet;
             outColor = ColorLib.Violet;
-            disOut = WineRed;
+            AddonsColor = WineRed;
             NotificationLib.SendNotification("<color=white>[</color><color=blue>Theme</color><color=white>] Violet/Default</color>");
             RefreshMenu();
         }

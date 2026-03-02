@@ -78,16 +78,12 @@ namespace Violet.Mods
             viewBatch.Clear();
         }
 
-        public static float ReturnNotKickableAmount()
+        public static void ResetPlayer()
         {
-            if (PhotonNetwork.InRoom)
+            RunViewUpdatePatch.SerilizeData = () =>
             {
-                return 0.014f * PhotonNetwork.CurrentRoom.PlayerCount;
-            }
-            else
-            {
-                return 0;
-            }
+                return true;
+            };
         }
         #endregion
 
@@ -98,19 +94,34 @@ namespace Violet.Mods
             {
                 if (PhotonNetwork.InRoom)
                 {
-                    if (!Tools.RigIsInfected(GunLib.LockedRig))
+                    if (PhotonNetwork.IsMasterClient)
                     {
-                        VRRig.LocalRig.transform.position = GunLib.LockedRig.transform.position;
-
-                        GameObject.Find("Player Objects/RigCache/Network Parent/GameMode(Clone)").GetPhotonView().RPC("RPC_ReportTag", RpcTarget.MasterClient, new object[] { GunLib.LockedRig.creator.ActorNumber });
-                        SerializeUpdate(GorillaTagger.Instance.myVRRig.punView, new RaiseEventOptions
+                        GorillaTagManager component = GorillaGameManager.instance.gameObject.GetComponent<GorillaTagManager>();
+                        if (PhotonNetwork.CurrentRoom.PlayerCount < 4)
                         {
-                            TargetActors = new int[] { PhotonNetwork.MasterClient.ActorNumber }
-                        });
-                        VRRig.LocalRig.transform.position = GorillaTagger.Instance.transform.position;
+                            component.ChangeCurrentIt(GunLib.LockedRig.creator, true);
+                        }
+                        else
+                        {
+                            component.AddInfectedPlayer(GunLib.LockedRig.creator, true);
+                        }
                     }
+                    else
+                    {
+                        if (!Tools.RigIsInfected(GunLib.LockedRig))
+                        {
+                            VRRig.LocalRig.transform.position = GunLib.LockedRig.transform.position;
 
+                            GameObject.Find("Player Objects/RigCache/Network Parent/GameMode(Clone)").GetPhotonView().RPC("RPC_ReportTag", RpcTarget.MasterClient, new object[] { GunLib.LockedRig.creator.ActorNumber });
+                            SerializeUpdate(GorillaTagger.Instance.myVRRig.punView, new RaiseEventOptions
+                            {
+                                TargetActors = new int[] { PhotonNetwork.MasterClient.ActorNumber }
+                            });
+                            VRRig.LocalRig.transform.position = GorillaTagger.Instance.transform.position;
+                        }
+                    }
                 }
+
             });
         }
 
@@ -118,23 +129,39 @@ namespace Violet.Mods
         {
             if (PhotonNetwork.InRoom)
             {
-                for (int i = 0; i < PhotonNetwork.PlayerListOthers.Length; i++)
+                if (PhotonNetwork.IsMasterClient)
                 {
-                    Player plr = PhotonNetwork.PlayerListOthers[i];
-
-                    VRRig.LocalRig.transform.position = GunLib.LockedRig.transform.position;
-
-                    GameObject.Find("Player Objects/RigCache/Network Parent/GameMode(Clone)").GetPhotonView().RPC("RPC_ReportTag", RpcTarget.MasterClient, new object[] { GunLib.LockedRig.creator.ActorNumber });
-                    SerializeUpdate(GorillaTagger.Instance.myVRRig.punView, new RaiseEventOptions
+                    foreach (Player plr in PhotonNetwork.PlayerList)
                     {
-                        TargetActors = new int[] { PhotonNetwork.MasterClient.ActorNumber }
-                    });
-                    VRRig.LocalRig.transform.position = GorillaTagger.Instance.transform.position;
+                        GorillaTagManager component = GorillaGameManager.instance.gameObject.GetComponent<GorillaTagManager>();
+                        if (PhotonNetwork.CurrentRoom.PlayerCount < 4)
+                        {
+                            component.ChangeCurrentIt(plr, true);
+                        }
+                        else
+                        {
+                            component.AddInfectedPlayer(plr, true);
+                        }
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < PhotonNetwork.PlayerListOthers.Length; i++)
+                    {
+                        Player plr = PhotonNetwork.PlayerListOthers[i];
 
+                        VRRig.LocalRig.transform.position = RigManager.GetVRRigFromPlayer(plr).transform.position;
+
+                        GameObject.Find("Player Objects/RigCache/Network Parent/GameMode(Clone)").GetPhotonView().RPC("RPC_ReportTag", RpcTarget.MasterClient, new object[] { plr.ActorNumber });
+                        SerializeUpdate(GorillaTagger.Instance.myVRRig.punView, new RaiseEventOptions
+                        {
+                            TargetActors = new int[] { PhotonNetwork.MasterClient.ActorNumber }
+                        });
+                        VRRig.LocalRig.transform.position = GorillaTagger.Instance.transform.position;
+
+                    }
                 }
             }
-
-
         }
 
         public static void TagSelf()
@@ -229,6 +256,7 @@ namespace Violet.Mods
             }
         }
 
+
         public static void TagBot()
         {
             if (PhotonNetwork.InRoom)
@@ -248,7 +276,7 @@ namespace Violet.Mods
         {
             GunLib.MakeGun(true, () =>
             {
-                Advantage.MatPlayer(RigManager.GetPlayerFromVRRig(GunLib.LockedRig));
+                MatPlayer(RigManager.GetPlayerFromVRRig(GunLib.LockedRig), 0.1f);
             });
         }
 
@@ -256,10 +284,7 @@ namespace Violet.Mods
         {
             if (PhotonNetwork.InRoom)
             {
-                foreach (Player plr in PhotonNetwork.PlayerList)
-                {
-                    Advantage.MatPlayer(plr);
-                }
+                MatPlayer(RigManager.GetRandomPlayer(true), 0.01f);
             }
         }
 
@@ -267,17 +292,16 @@ namespace Violet.Mods
         {
             if (PhotonNetwork.InRoom)
             {
-                Advantage.MatPlayer(PhotonNetwork.LocalPlayer);
+                MatPlayer(PhotonNetwork.LocalPlayer, 0.1f);
             }
         }
 
-        public static void MatPlayer(Player plr)
+        public static void MatPlayer(Player plr, float Delay)
         {
             if (PhotonNetwork.IsMasterClient)
             {
-                if (Time.time > Variables.Delay)
+                if (Tools.Delay(Delay))
                 {
-                    Variables.Delay = Time.time + 0.05f;
                     GorillaTagManager component = GorillaGameManager.instance.gameObject.GetComponent<GorillaTagManager>();
                     if (component.currentInfected.Contains(plr))
                     {
@@ -285,7 +309,7 @@ namespace Violet.Mods
                     }
                     else
                     {
-                        component.AddInfectedPlayer(plr, false);
+                        component.currentInfected.Add(plr);
                     }
                 }
             }
@@ -403,15 +427,18 @@ namespace Violet.Mods
 
         public static void SlowPlayer(object[] stuff)
         {
-            if (PhotonNetwork.IsMasterClient)
+            if (PhotonNetwork.InRoom)
             {
-                if (stuff[0] is Player)
+                if (PhotonNetwork.IsMasterClient)
                 {
-                    RoomSystem.SendStatusEffectToPlayer(RoomSystem.StatusEffects.SetSlowedTime, (NetPlayer)stuff[0]);
-                }
-                else
-                {
-                    RoomSystem.SendStatusEffectAll(RoomSystem.StatusEffects.SetSlowedTime);
+                    if (stuff[0] is Player)
+                    {
+                        RoomSystem.SendStatusEffectToPlayer(RoomSystem.StatusEffects.JoinedTaggedTime, (NetPlayer)stuff[0]);
+                    }
+                    else
+                    {
+                        RoomSystem.SendStatusEffectAll(RoomSystem.StatusEffects.JoinedTaggedTime);
+                    }
                 }
             }
         }
@@ -429,20 +456,23 @@ namespace Violet.Mods
 
         public static void SlowAll()
         {
-            Advantage.SlowPlayer(new object[0]);
+            Advantage.SlowPlayer(new object[] { });
         }
 
         public static void VibratePlayer(object[] stuff)
         {
-            if (PhotonNetwork.IsMasterClient)
+            if (PhotonNetwork.InRoom)
             {
-                if (stuff[0] is Player)
+                if (PhotonNetwork.IsMasterClient)
                 {
-                    RoomSystem.SendStatusEffectToPlayer(RoomSystem.StatusEffects.JoinedTaggedTime, (NetPlayer)stuff[0]);
-                }
-                else
-                {
-                    RoomSystem.SendStatusEffectAll(RoomSystem.StatusEffects.JoinedTaggedTime);
+                    if (stuff[0] is Player)
+                    {
+                        RoomSystem.SendStatusEffectToPlayer(RoomSystem.StatusEffects.JoinedTaggedTime, (NetPlayer)stuff[0]);
+                    }
+                    else
+                    {
+                        RoomSystem.SendStatusEffectAll(RoomSystem.StatusEffects.JoinedTaggedTime);
+                    }
                 }
             }
         }
@@ -453,14 +483,14 @@ namespace Violet.Mods
             {
                 Advantage.VibratePlayer(new object[]
                 {
-                    GunLib.LockedRig.creator
+                    GunLib.LockedRig.OwningNetPlayer
                 });
             });
         }
 
         public static void VibrateAll()
         {
-            Advantage.VibratePlayer(new object[0]);
+            Advantage.VibratePlayer(new object[] { });
         }
     }
 }

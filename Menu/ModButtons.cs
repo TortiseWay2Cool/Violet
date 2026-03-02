@@ -7,6 +7,8 @@ using static Violet.Menu.ButtonHandler;
 using static Violet.Menu.Main;
 using static Violet.Utilities.Variables;
 
+using static Violet.Mods.Room;
+using static Violet.Mods.Players;
 using static Violet.Mods.Advantage;
 using static Violet.Mods.Overpowered;
 using static Violet.Mods.Master;
@@ -14,6 +16,8 @@ using static Violet.Mods.Master;
 using UnityEngine;
 using Violet.GUI;
 using Violet.Menu.Utilities;
+using GorillaGameModes;
+using Violet.Mods;
 
 namespace Violet.Menu
 {
@@ -84,17 +88,54 @@ namespace Violet.Menu
 
             // Room
             new Button("Check If Master []", Category.Room, false, false, ()=> Tools.IsMasterCheck()),
-
+            new Button("Set GameMode : Casual", Category.Room, false, false, ()=> SetGamemode(GameModeType.Casual)),
+            new Button("Set GameMode : Infection", Category.Room, false, false, ()=> SetGamemode(GameModeType.Infection)),
+            new Button("Set GameMode : Hunt", Category.Room, false, false, ()=> SetGamemode(GameModeType.HuntDown)),
+            new Button("Set GameMode : Paintbrawl", Category.Room, false, false, ()=> SetGamemode(GameModeType.Paintbrawl)),
+            new Button("Set GameMode : Ambush", Category.Room, false, false, ()=> SetGamemode(GameModeType.Ambush)),
+            new Button("Set GameMode : FreezeTag", Category.Room, false, false, ()=> SetGamemode(GameModeType.FreezeTag)),
+            new Button("Set GameMode : Ghost", Category.Room, false, false, ()=> SetGamemode(GameModeType.Ghost)),
+            new Button("Set GameMode : Guardian", Category.Room, false, false, ()=> SetGamemode(GameModeType.Guardian)),
+            new Button("Set GameMode : SuperInfect", Category.Room, false, false, ()=> SetGamemode(GameModeType.SuperInfect)),
+            new Button("Set GameMode : SuperCasual", Category.Room, false, false, ()=> SetGamemode(GameModeType.SuperCasual)),
             // Saftey
 
             // Movement
 
             // Player
 
+            new Button("Ghost", Category.Player, true, false, () => Ghost(false), ()=> Ghost(true)),
+            new Button("Invis", Category.Player, true, false, () => Invis(false), ()=> Invis(true)),
+            new Button("Ghost [LP]", Category.Player, true, false, () => LPGhost(false), ()=> Ghost(true)),
+            new Button("Invis [RP]", Category.Player, true, false, () => RPInvis(false), ()=> Invis(true)),
+            new Button("Stump Kick All", Category.Player, true, false, () => StumpKickAll()),
+            new Button("Stump Kick Gun", Category.Player, true, false, () => StumpKickGun()),
+            new Button("Follow All", Category.Player, true, false, () => FollowAll(), ()=> ResetPlayer()),
+            new Button("Follow Gun", Category.Player, true, false, () => FollowGun(), ()=> ResetPlayer()),
+            new Button("Follow Closest", Category.Player, true, false, () => FollowClosest(), ()=> ResetPlayer()),
+            new Button("Copy Movement All", Category.Player, true, false, () => CopyMovementAll(), ()=> ResetPlayer()),
+            new Button("Copy Movement Gun", Category.Player, true, false, () => CopyMovementGun(), ()=> ResetPlayer()),
+            new Button("Copy Movement Closest", Category.Player, true, false, () => CopyMovementClosest(), ()=> ResetPlayer()),
+            new Button("Scare All", Category.Player, true, false, () => ScareAll(), ()=> ResetPlayer()),
+            new Button("Scare Gun", Category.Player, true, false, () => ScareGun(), ()=> ResetPlayer()),
+            new Button("Scare Closest", Category.Player, true, false, () => ScareClosest(), ()=> ResetPlayer()),
+
             // Advantage
             new Button("Tag Gun", Category.Advantage, true, false, () => TagGun()),
             new Button("Tag All", Category.Advantage, true, false, () => TagAll()),
             new Button("Tag Self", Category.Advantage, true, false, () => TagSelf()),
+            new Button("Anti Tag", Category.Advantage, true, false, () => AntiTag()),
+            new Button("Tag Bot", Category.Advantage, true, false, () => TagBot()),
+            new Button("Restart Game Mode <color=#FF0000>[M]</color>", Category.Advantage, true, false, () => RestartGameMode()),
+            new Button("Set Infection Threshold <color=#FF0000>[M]</color>", Category.Advantage, true, false, () => SetInfectionThreshold(4)),
+            new Button("Brawl Kill All <color=#FF0000>[M]</color>", Category.Advantage, true, false, () => BrawlKillAll()),
+            new Button("Brawl Kill Gun <color=#FF0000>[M]</color>", Category.Advantage, true, false, () => BrawlKillGun()),
+            new Button("Brawl Inf Lives <color=#FF0000>[M]</color>", Category.Advantage, true, false, () => BrawlInfLives(true)),
+            new Button("Brawl Give Inf Lives <color=#FF0000>[M]</color>", Category.Advantage, true, false, () => BrawlGiveInfLives()),
+            new Button("Brawl Revive All <color=#FF0000>[M]</color>", Category.Advantage, true, false, () => BrawlReviveAll()),
+            new Button("Brawl Revive Gun <color=#FF0000>[M]</color>", Category.Advantage, true, false, () => BrawlReviveGun()),
+            new Button("Brawl Restart <color=#FF0000>[M]</color>", Category.Advantage, true, false, () => BrawlRestart()),
+            new Button("Brawl Team Battle <color=#FF0000>[M]</color>", Category.Advantage, true, false, () => BrawlTeamBattle()),
 
             // Visuals
 
@@ -102,15 +143,31 @@ namespace Violet.Menu
 
             // Overpowered
             new Button("Master", Category.Overpowered, false, false, () => ChangePage(Category.Master)),
-            new Button("Scitzo Gun", Category.Overpowered, true, false, () => ScitzoGun()),
-            new Button("Reverse Scitzo Gun", Category.Overpowered, true, false, () => ReverseScitzoGun()),
+            new Button("Scitzo Gun", Category.Overpowered, true, false, () => ScitzoGun(), ()=> ResetPlayer()),
+            new Button("Reverse Scitzo Gun", Category.Overpowered, true, false, () => ReverseScitzoGun(), ()=> ResetPlayer()),
+            new Button("Kick Master", Category.Overpowered, true, false, () => KickMaster()),
+            new Button("Kick Master Gun", Category.Overpowered, true, false, () => KickMasterGun()),
+            new Button("Slow Set Master", Category.Overpowered, true, false, () => SlowSetMaster()),
             new Button("Lag All", Category.Overpowered, true, false, () => Lag(0)),
+            new Button("Lag Gun", Category.Overpowered, true, false, () => KickAll()),
+            new Button("Destroy Gun", Category.Overpowered, true, false, () => DestroyGun()),
+            new Button("Destroy All", Category.Overpowered, false, false, () => DestroyAll()),
 
             // Master
             new Button("Back", Category.Master, false, false, () => ChangePage(Category.Overpowered)),
+            new Button("Mat Gun <color=#FF0000>[M]</color>", Category.Master, true, false, () => MatGun()),
+            new Button("Mat All  <color=#FF0000>[M]</color>", Category.Master, true, false, () => MatAll()),
+            new Button("Mat Self <color=#FF0000>[M]</color>", Category.Master, true, false, () => MatSelf()),
+            new Button("Slow Gun <color=#FF0000>[M]</color>", Category.Master, true, false, () => SlowGun()),
+            new Button("Slow All <color=#FF0000>[M]</color>", Category.Master, true, false, () => SlowAll()),
+            new Button("Vibrate Gun <color=#FF0000>[M]</color>", Category.Master, true, false, () => VibrateGun()),
+            new Button("Vibrate All <color=#FF0000>[M]</color>", Category.Master, true, false, () => VibrateAll()),
             new Button("Zero Gravity All", Category.Master, true, false, () => ZeroGravityAll(true), ()=> ZeroGravityAll(false)),
             new Button("Zero Gravity Others", Category.Master, true, false, () => ZeroGravityOthers()),
             new Button("Zero Gravity Gun", Category.Master, true, false, () => ZeroGravityGun()),
+            new Button("Low Gravity All", Category.Master, true, false, () => LowGravityAll(true), ()=> LowGravityAll(false)),
+            new Button("Low Gravity Others", Category.Master, true, false, () => LowGravityOthers()),
+            new Button("Low Gravity Gun", Category.Master, true, false, () => LowGravityGun()),
             new Button("Grey Screen All", Category.Master, true, false, () => GreyScreenAll(), ()=> ZeroGravityAll(false)),
             new Button("Grey Screen Others", Category.Master, true, false, () => GreyScreenOthers()),
             new Button("Grey Screen Gun", Category.Master, true, false, () => GreyScreenGun()),

@@ -46,7 +46,59 @@ namespace Violet.Mods
                     GreyZoneManager.Instance.greyZoneActive = true;
                     GreyZoneManager.Instance.photonConnectedDuringActivation = PhotonNetwork.InRoom;
                     GreyZoneManager.Instance.greyZoneActivationTime = PhotonNetwork.Time;
+                    GreyZoneManager.Instance.gravityFactorOptionSelection = int.MaxValue;
+                    SerializeUpdate(GreyZoneManager.Instance.photonView, new RaiseEventOptions
+                    {
+                        TargetActors = new int[] { GunLib.LockedRig.creator.ActorNumber },
+                    });
+                    return false;
+                };
+            });
+        }
+        public static void LowGravityAll(bool Enabled)
+        {
+            GreyZoneManager.Instance.greyZoneActive = Enabled;
+            GreyZoneManager.Instance.photonConnectedDuringActivation = PhotonNetwork.InRoom;
+            GreyZoneManager.Instance.greyZoneActivationTime = (GreyZoneManager.Instance.photonConnectedDuringActivation ? PhotonNetwork.Time : ((double)Time.time));
+            if (GreyZoneManager.Instance.gravityFactorOptionSelection != int.MaxValue)
+                GreyZoneManager.Instance.gravityFactorOptionSelection = int.MaxValue;
+            else
+                GreyZoneManager.Instance.gravityFactorOptionSelection = 0;
+            GreyZoneManager.Instance.ActivateGreyZoneLocal();
+        }
+
+        public static void LowGravityOthers()
+        {
+            RunViewUpdatePatch.SerilizeData = () =>
+            {
+                GreyZoneManager.Instance.greyZoneActive = true;
+                GreyZoneManager.Instance.photonConnectedDuringActivation = PhotonNetwork.InRoom;
+                GreyZoneManager.Instance.greyZoneActivationTime = PhotonNetwork.Time;
+                if (GreyZoneManager.Instance.gravityFactorOptionSelection != int.MaxValue)
+                    GreyZoneManager.Instance.gravityFactorOptionSelection = int.MaxValue;
+                else
                     GreyZoneManager.Instance.gravityFactorOptionSelection = 0;
+                SerializeUpdate(GreyZoneManager.Instance.photonView, new RaiseEventOptions
+                {
+                    Receivers = ReceiverGroup.Others,
+                });
+                return false;
+            };
+        }
+
+        public static void LowGravityGun()
+        {
+            GunLib.MakeGun(true, () =>
+            {
+                RunViewUpdatePatch.SerilizeData = () =>
+                {
+                    GreyZoneManager.Instance.greyZoneActive = true;
+                    GreyZoneManager.Instance.photonConnectedDuringActivation = PhotonNetwork.InRoom;
+                    GreyZoneManager.Instance.greyZoneActivationTime = PhotonNetwork.Time;
+                    if (GreyZoneManager.Instance.gravityFactorOptionSelection != int.MaxValue)
+                        GreyZoneManager.Instance.gravityFactorOptionSelection = int.MaxValue;
+                    else
+                        GreyZoneManager.Instance.gravityFactorOptionSelection = 0;
                     SerializeUpdate(GreyZoneManager.Instance.photonView, new RaiseEventOptions
                     {
                         TargetActors = new int[] { GunLib.LockedRig.creator.ActorNumber },

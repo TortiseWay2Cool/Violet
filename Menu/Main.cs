@@ -757,6 +757,9 @@ namespace Violet.Menu
             {
                 RoundModButton(modButton, 0.008f);
             }
+
+            button.VisualObject = modButton;
+            button.TextObject = text;
         }
 
         public static void RoundModButton(GameObject toRound, float Bevel = 0.02f)

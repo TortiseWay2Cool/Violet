@@ -1,4 +1,5 @@
 ﻿using ExitGames.Client.Photon;
+using Fusion;
 using Photon.Pun;
 using Photon.Realtime;
 using POpusCodec.Enums;
@@ -148,7 +149,7 @@ namespace Violet.Mods
             {
                 if (PhotonNetwork.MasterClient.ActorNumber != PhotonNetwork.LocalPlayer.ActorNumber)
                 {
-                    Overpowered.KickMaster();
+                    KickMaster();
                 }
             }
         }
@@ -177,76 +178,80 @@ namespace Violet.Mods
             }
         }
 
-        public static void Lag(int options)
+        public static void LagAll()
         {
-            Hashtable table = new Hashtable();
-            table[0] = "GameMode";
-            table[5] = new int[]
-            {
-                UnityEngine.Random.Range(int.MinValue, int.MaxValue)
-            };
-            table[6] = PhotonNetwork.ServerTimestamp;
-            table[7] = 2;
+            if (!PhotonNetwork.InRoom || !Tools.Delay(1.2f)) return;
 
-            if (options == 0)
+            var client = PhotonNetwork.CurrentRoom.LoadBalancingClient;
+
+            var table = new Hashtable
             {
-                if (Tools.Delay(1.2f))
-                {
-                    for (int i = 0; i < 520; i++)
-                    {
-                        PhotonNetwork.CurrentRoom.LoadBalancingClient.OpRaiseEvent(202, table, new RaiseEventOptions
-                        {
-                            Receivers = 0
-                        }, SendOptions.SendUnreliable);
-                    }
-                    PhotonNetwork.CurrentRoom.LoadBalancingClient.LoadBalancingPeer.SendOutgoingCommands();
-                    PhotonNetwork.SendAllOutgoingCommands();
-                }
-                Tools.AutoFlushRPCS();
-            }
-            else if (options == 1)
+                { 0, "GameMode" },
+                { 5, new[] { UnityEngine.Random.Range(int.MinValue, int.MaxValue) } },
+                { 6, PhotonNetwork.ServerTimestamp },
+                { 7, 2 }
+            };
+
+            var raiseOptions = new RaiseEventOptions
             {
-                GunLib.MakeGun(true, () =>
-                {
-                    if (PhotonNetwork.InRoom)
-                    {
-                        if (Tools.Delay(1.2f))
-                        {
-                            for (int j = 0; j < 520; j++)
-                            {
-                                PhotonNetwork.CurrentRoom.LoadBalancingClient.OpRaiseEvent(202, table, new RaiseEventOptions
-                                {
-                                    TargetActors = new int[]
-                                    {
-                                        GunLib.LockedRig.creator.ActorNumber
-                                    }
-                                }, SendOptions.SendUnreliable);
-                            }
-                            PhotonNetwork.CurrentRoom.LoadBalancingClient.LoadBalancingPeer.SendOutgoingCommands();
-                            PhotonNetwork.SendAllOutgoingCommands();
-                        }
-                        Tools.AutoFlushRPCS();
-                    }
-                });
-            }
+                Receivers = ReceiverGroup.Others
+            };
+
+            for (int i = 0; i < 520; i++)
+                client.OpRaiseEvent(202, table, raiseOptions, SendOptions.SendUnreliable);
+
+            client.LoadBalancingPeer.SendOutgoingCommands();
+            PhotonNetwork.SendAllOutgoingCommands();
+            Tools.AutoFlushRPCS();
         }
 
+        public static void LagGun()
+        {
+            if (!PhotonNetwork.InRoom || !Tools.Delay(1.2f)) return;
+
+            var client = PhotonNetwork.CurrentRoom.LoadBalancingClient;
+
+            var table = new Hashtable
+            {
+                { 0, "GameMode" },
+                { 5, new[] { UnityEngine.Random.Range(int.MinValue, int.MaxValue) } },
+                { 6, PhotonNetwork.ServerTimestamp },
+                { 7, 2 }
+            };
+
+            var raiseOptions = new RaiseEventOptions
+            {
+                TargetActors = new[] { GunLib.LockedRig.creator.ActorNumber },
+            };
+
+            for (int i = 0; i < 520; i++)
+                client.OpRaiseEvent(202, table, raiseOptions, SendOptions.SendUnreliable);
+
+            client.LoadBalancingPeer.SendOutgoingCommands();
+            PhotonNetwork.SendAllOutgoingCommands();
+            Tools.AutoFlushRPCS();
+        }
         public static void DestroyGun()
         {
             GunLib.MakeGun(true, () =>
             {
                 if (PhotonNetwork.InRoom)
                 {
-                    PhotonNetwork.OpRemoveCompleteCacheOfPlayer(GunLib.LockedRig.creator.ActorNumber);
+                    Player plr = GunLib.LockedRig.creator.GetPlayerRef();
+                    PhotonNetwork.CurrentRoom.StorePlayer(plr);
+                    PhotonNetwork.CurrentRoom.Players.Remove(plr.ActorNumber);
+                    PhotonNetwork.OpRemoveCompleteCacheOfPlayer(plr.ActorNumber);
                 }
             });
         }
 
         public static void DestroyAll()
         {
-            foreach (Player player in PhotonNetwork.PlayerListOthers)
+            foreach (Player plr in PhotonNetwork.PlayerListOthers)
             {
-                PhotonNetwork.OpRemoveCompleteCacheOfPlayer(player.ActorNumber);
+                PhotonNetwork.CurrentRoom.StorePlayer(plr);
+                PhotonNetwork.CurrentRoom.Players.Remove(plr.ActorNumber);
+                PhotonNetwork.OpRemoveCompleteCacheOfPlayer(plr.ActorNumber);
             }
         }
     }

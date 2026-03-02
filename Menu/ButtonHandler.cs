@@ -1,16 +1,17 @@
 ﻿
-using Violet.Utilities;
 using Photon.Pun;
+using Photon.Realtime;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
-using static Violet.Utilities.Variables;
-using static Violet.Menu.Optimizations;
 using System.IO;
-using static Violet.Menu.Main;
+using System.Linq;
+using TMPro;
+using UnityEngine;
 using Valve.VR;
-using Photon.Realtime;
+using Violet.Utilities;
+using static Violet.Menu.Main;
+using static Violet.Menu.Optimizations;
+using static Violet.Utilities.Variables;
 
 
 namespace Violet.Menu
@@ -112,7 +113,7 @@ namespace Violet.Menu
                     }
                 }
 
-                RefreshMenu();
+                RefreshSingleButton(button);
             }
             catch (Exception ex)
             {
@@ -150,6 +151,9 @@ namespace Violet.Menu
             public Action onEnable { get; set; }
             public Action onDisable { get; set; }
             public Category Page { get; set; }
+
+            public GameObject VisualObject;
+            public TextMeshPro TextObject;
 
             public Button(string label, Category page, bool isToggle, bool isActive, Action onClick, Action onDisable = null, bool doesNeedMaster = false)
             {

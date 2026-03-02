@@ -162,6 +162,22 @@ namespace Violet.Menu
             ClearMenuObjects();
             Draw();
         }
-        // Really just trying out my Commit Script. If you see this, it worked.
+        public static void RefreshSingleButton(ButtonHandler.Button button)
+        {
+            if (button.VisualObject == null)
+                return;
+
+            var renderer = button.VisualObject.GetComponent<Renderer>();
+            if (renderer != null)
+            {
+                // Force unique material instance
+                renderer.material = new Material(renderer.material);
+
+                renderer.material.color = button.Enabled
+                    ? ButtonColorOn
+                    : ButtonColorOff;
+            }
+            Debug.Log("Refreshing: " + button.buttonText + " Enabled: " + button.Enabled);
+        }
     }
 }

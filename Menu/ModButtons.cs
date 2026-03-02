@@ -7,6 +7,7 @@ using static Violet.Menu.ButtonHandler;
 using static Violet.Menu.Main;
 using static Violet.Utilities.Variables;
 
+using static Violet.Mods.Settings;
 using static Violet.Mods.Room;
 using static Violet.Mods.Players;
 using static Violet.Mods.Advantage;
@@ -72,13 +73,11 @@ namespace Violet.Menu
             //new Button("Custom Boards", Category.MenuSettings, true, false, () => Main.Board()), // Adding this Later
             new Button("Disable Array List", Category.MenuSettings, true, false, () => VioletGUI.guiEnabled = true, () => VioletGUI.guiEnabled = false),
             new Button("Toggle Disconect Button", Category.MenuSettings, true, false, () => toggledisconnectButton = true, ()=> toggledisconnectButton = false),
-            new Button("Toggle Player Catagorys", Category.MenuSettings, true, false, () => SideCatagorys = true, () => SideCatagorys = false),
-            new Button("Toggle Player Tabs", Category.MenuSettings, true, false, () => Variables.PlayerTab = true, ()=> Variables.PlayerTab = false),
-            new Button("Toggle Rigidbdy", Category.MenuSettings, true, false, () => Variables.Rigidbody = true, ()=> Variables.Rigidbody = false),
-            new Button("Toggle Gravity", Category.MenuSettings, true, false, () => Variables.gravity = true, ()=> Variables.gravity = false),
-            new Button("Current Menu Theme []", Category.MenuSettings, false, false, ()=> Main.ChangeTheme()),
-            new Button("Current Menu Outline []", Category.MenuSettings, false, false, ()=> Main.ChangeOutlineColor()),
-            new Button("Current Menu Sound", Category.MenuSettings, false, false, ()=> Main.ChangeSound()),
+            new Button("Toggle Rigidbdy", Category.MenuSettings, true, true, () => Variables.Rigidbody = true, ()=> Variables.Rigidbody = false),
+            new Button("Toggle Gravity", Category.MenuSettings, true, true, () => gravity = true, ()=> gravity = false),
+            new Button("Current Menu Theme [Base]", Category.MenuSettings, false, false, ()=> ChangeTheme()),
+            new Button("Current Menu Outline [Base]", Category.MenuSettings, false, false, ()=> ChangeOutlineColor()),
+            new Button("Current Menu Sound [Base]", Category.MenuSettings, false, false, ()=> ChangeSound()),
             
             // Gun Settings
             new Button("Gun Example", Category.GunSettings, true, false, () => GunLib.MakeGun(true, null)),
@@ -149,28 +148,30 @@ namespace Violet.Menu
             new Button("Kick Master Gun", Category.Overpowered, true, false, () => KickMasterGun()),
             new Button("Slow Set Master", Category.Overpowered, true, false, () => SlowSetMaster()),
             new Button("Lag All", Category.Overpowered, true, false, () => Lag(0)),
-            new Button("Lag Gun", Category.Overpowered, true, false, () => KickAll()),
+            new Button("Lag Gun", Category.Overpowered, true, false, () => Lag(1)),
             new Button("Destroy Gun", Category.Overpowered, true, false, () => DestroyGun()),
             new Button("Destroy All", Category.Overpowered, false, false, () => DestroyAll()),
 
             // Master
             new Button("Back", Category.Master, false, false, () => ChangePage(Category.Overpowered)),
-            new Button("Mat Gun <color=#FF0000>[M]</color>", Category.Master, true, false, () => MatGun()),
-            new Button("Mat All  <color=#FF0000>[M]</color>", Category.Master, true, false, () => MatAll()),
-            new Button("Mat Self <color=#FF0000>[M]</color>", Category.Master, true, false, () => MatSelf()),
-            new Button("Slow Gun <color=#FF0000>[M]</color>", Category.Master, true, false, () => SlowGun()),
-            new Button("Slow All <color=#FF0000>[M]</color>", Category.Master, true, false, () => SlowAll()),
-            new Button("Vibrate Gun <color=#FF0000>[M]</color>", Category.Master, true, false, () => VibrateGun()),
-            new Button("Vibrate All <color=#FF0000>[M]</color>", Category.Master, true, false, () => VibrateAll()),
-            new Button("Zero Gravity All", Category.Master, true, false, () => ZeroGravityAll(true), ()=> ZeroGravityAll(false)),
-            new Button("Zero Gravity Others", Category.Master, true, false, () => ZeroGravityOthers()),
-            new Button("Zero Gravity Gun", Category.Master, true, false, () => ZeroGravityGun()),
-            new Button("Low Gravity All", Category.Master, true, false, () => LowGravityAll(true), ()=> LowGravityAll(false)),
-            new Button("Low Gravity Others", Category.Master, true, false, () => LowGravityOthers()),
-            new Button("Low Gravity Gun", Category.Master, true, false, () => LowGravityGun()),
-            new Button("Grey Screen All", Category.Master, true, false, () => GreyScreenAll(), ()=> ZeroGravityAll(false)),
+            new Button("Gravity Type", Category.Master, false, false, () => ChangeGravityType()),
+            new Button("Gravity All", Category.Master, true, false, () => GravityAll()),
+            new Button("Gravity Others", Category.Master, true, false, () => GravityOthers()),
+            new Button("Gravity Gun", Category.Master, true, false, () => GravityGun()),
+            new Button("Grey Screen All", Category.Master, true, false, () => GreyScreenAll()),
             new Button("Grey Screen Others", Category.Master, true, false, () => GreyScreenOthers()),
             new Button("Grey Screen Gun", Category.Master, true, false, () => GreyScreenGun()),
+
+            new Button("Mat Gun ", Category.Master, true, false, () => MatGun()),
+            new Button("Mat All  ", Category.Master, true, false, () => MatAll()),
+            new Button("Mat Self ", Category.Master, true, false, () => MatSelf()),
+            new Button("Slow Gun ", Category.Master, true, false, () => SlowGun()),
+            new Button("Slow All ", Category.Master, true, false, () => SlowAll()),
+            new Button("Vibrate Gun ", Category.Master, true, false, () => VibrateGun()),
+            new Button("Vibrate All ", Category.Master, true, false, () => VibrateAll()),
+            
+
+
            
             // SoundBoard Category
             new Button("Play Alarm", Category.SoundBoard, false, false, () => AudioManager.PlaySoundThroughMicrophone(AudioManager.LoadSoundFromURL("https://raw.githubusercontent.com/TortiseWay2Cool/SoundBoard/main/alarm!!!-made-with-Voicemod.mp3", "alarm!!!-made-with-Voicemod.mp3"), false)),

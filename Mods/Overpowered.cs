@@ -98,7 +98,7 @@ namespace Violet.Mods
                         {
                             PhotonNetwork.MasterClient.ActorNumber
                         },
-                        CachingOption = EventCaching.AddToRoomCache
+                        CachingOption = EventCaching.AddToRoomCacheGlobal
                     }, SendOptions.SendUnreliable);
                 }
 
@@ -153,13 +153,13 @@ namespace Violet.Mods
             }
         }
 
-        public static void KickAll()
+        public static void FreezeAll()
         {
             if (PhotonNetwork.InRoom)
             {
                 if (Tools.Delay(1))
                 {
-                    for (int i = 0; i < 47; i++)
+                    for (int i = 0; i < 70; i++)
                     {
                         PhotonNetwork.CurrentRoom.LoadBalancingClient.OpRaiseEvent(22, new object[]
                         {

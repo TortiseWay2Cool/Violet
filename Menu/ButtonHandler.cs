@@ -113,7 +113,8 @@ namespace Violet.Menu
                     }
                 }
 
-                RefreshSingleButton(button);
+                // RefreshSingleButton(button);
+                RefreshMenu();
             }
             catch (Exception ex)
             {

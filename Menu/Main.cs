@@ -290,6 +290,7 @@ namespace Violet.Menu
             if (menuObj != null)
             {
                 ClearMenuObjects();
+                visibleButtons.Clear();
                 return;
             }
 
@@ -760,7 +761,9 @@ namespace Violet.Menu
 
             button.VisualObject = modButton;
             button.TextObject = text;
+            visibleButtons[button] = modButton;
         }
+        public static Dictionary<ButtonHandler.Button, GameObject> visibleButtons = new Dictionary<ButtonHandler.Button, GameObject>();
 
         public static void RoundModButton(GameObject toRound, float Bevel = 0.02f)
         {

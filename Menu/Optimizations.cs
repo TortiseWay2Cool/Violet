@@ -160,24 +160,21 @@ namespace Violet.Menu
         public static void RefreshMenu()
         {
             ClearMenuObjects();
+            visibleButtons.Clear();
             Draw();
         }
         public static void RefreshSingleButton(ButtonHandler.Button button)
         {
-            if (button.VisualObject == null)
+            if (!visibleButtons.TryGetValue(button, out var obj))
                 return;
 
-            var renderer = button.VisualObject.GetComponent<Renderer>();
-            if (renderer != null)
-            {
-                // Force unique material instance
-                renderer.material = new Material(renderer.material);
+            var renderer = obj.GetComponent<Renderer>();
+            if (renderer == null)
+                return;
 
-                renderer.material.color = button.Enabled
-                    ? ButtonColorOn
-                    : ButtonColorOff;
-            }
-            Debug.Log("Refreshing: " + button.buttonText + " Enabled: " + button.Enabled);
+            renderer.material.color = button.Enabled
+                ? ButtonColorOn
+                : ButtonColorOff;
         }
     }
 }

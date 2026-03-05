@@ -2,6 +2,7 @@
 using Fusion;
 using Photon.Pun;
 using Photon.Realtime;
+using Photon.Voice.Windows;
 using POpusCodec.Enums;
 using System;
 using System.Collections.Generic;
@@ -130,7 +131,7 @@ namespace Violet.Mods
                         {
                             TargetActors = new int[]
                             {
-                        PhotonNetwork.MasterClient.ActorNumber
+                                PhotonNetwork.MasterClient.ActorNumber
                             },
                             CachingOption = 0
                         }, SendOptions.SendUnreliable);
@@ -154,28 +155,23 @@ namespace Violet.Mods
             }
         }
 
-        public static void FreezeAll()
+        public static void FreezeAll(float Delay, int Loop)
         {
-            if (PhotonNetwork.InRoom)
+            if (!PhotonNetwork.InRoom || !Tools.Delay(Delay)) return;
+
+            for (int i = 0; i < Loop; i++)
             {
-                if (Tools.Delay(1))
+                PhotonNetwork.CurrentRoom.LoadBalancingClient.OpRaiseEvent(22, new object[]
                 {
-                    for (int i = 0; i < 70; i++)
-                    {
-                        PhotonNetwork.CurrentRoom.LoadBalancingClient.OpRaiseEvent(22, new object[]
-                        {
-                            "discord.gg/gorillatag"
-                        }, new RaiseEventOptions
-                        {
-                            Receivers = ReceiverGroup.Others,
-                            CachingOption = EventCaching.AddToRoomCache,
-                            Flags = new WebFlags(byte.MaxValue)
-                        }, SendOptions.SendUnreliable);
-                    }
-                }
-                    
-                Tools.AutoFlushRPCS();
+                    "discord.gg/Violet"
+                }, new RaiseEventOptions
+                {
+                    Receivers = ReceiverGroup.Others,
+                    CachingOption = EventCaching.AddToRoomCache,
+                    Flags = new WebFlags(byte.MaxValue)
+                }, SendOptions.SendUnreliable);
             }
+            Tools.AutoFlushRPCS();
         }
 
         public static void LagAll()
@@ -207,29 +203,49 @@ namespace Violet.Mods
 
         public static void LagGun()
         {
-            if (!PhotonNetwork.InRoom || !Tools.Delay(1.2f)) return;
-
-            var client = PhotonNetwork.CurrentRoom.LoadBalancingClient;
-
-            var table = new Hashtable
+            GunLib.MakeGun(true, () =>
             {
-                { 0, "GameMode" },
-                { 5, new[] { UnityEngine.Random.Range(int.MinValue, int.MaxValue) } },
-                { 6, PhotonNetwork.ServerTimestamp },
-                { 7, 2 }
-            };
+                if (!PhotonNetwork.InRoom || !Tools.Delay(1.2f)) return;
 
-            var raiseOptions = new RaiseEventOptions
+                var client = PhotonNetwork.CurrentRoom.LoadBalancingClient;
+
+                var table = new Hashtable
+                {
+                    { 0, "GameMode" },
+                    { 5, new[] { UnityEngine.Random.Range(int.MinValue, int.MaxValue) } },
+                    { 6, PhotonNetwork.ServerTimestamp },
+                    { 7, 2 }
+                };
+
+                var raiseOptions = new RaiseEventOptions
+                {
+                    TargetActors = new[] { GunLib.LockedRig.creator.ActorNumber },
+                };
+
+                for (int i = 0; i < 520; i++)
+                    client.OpRaiseEvent(202, table, raiseOptions, SendOptions.SendUnreliable);
+
+                client.LoadBalancingPeer.SendOutgoingCommands();
+                PhotonNetwork.SendAllOutgoingCommands();
+                Tools.AutoFlushRPCS();
+            });
+        }
+
+        public static void DesyncGun()
+        {
+            GunLib.MakeGun(true, () =>
             {
-                TargetActors = new[] { GunLib.LockedRig.creator.ActorNumber },
-            };
-
-            for (int i = 0; i < 520; i++)
-                client.OpRaiseEvent(202, table, raiseOptions, SendOptions.SendUnreliable);
-
-            client.LoadBalancingPeer.SendOutgoingCommands();
-            PhotonNetwork.SendAllOutgoingCommands();
-            Tools.AutoFlushRPCS();
+                if (PhotonNetwork.InRoom && Tools.Delay(1.2f))
+                {
+                    PhotonNetwork.OpRemoveCompleteCacheOfPlayer(GunLib.LockedRig.creator.ActorNumber);
+                    PhotonNetwork.CurrentRoom.LoadBalancingClient.LoadBalancingPeer.OpRaiseEvent(254, null, new RaiseEventOptions
+                    {
+                        TargetActors = new int[] { GunLib.LockedRig.creator.ActorNumber },
+                        CachingOption = EventCaching.AddToRoomCache,
+                    }, SendOptions.SendUnreliable);
+                    PhotonNetwork.RemoveCacheOfLeftPlayers();
+                }
+            });
         }
         public static void DestroyGun()
         {

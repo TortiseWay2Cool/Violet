@@ -125,6 +125,8 @@ namespace Violet.Menu
             new Button("Tag Self", Category.Advantage, true, false, () => TagSelf()),
             new Button("Anti Tag", Category.Advantage, true, false, () => AntiTag()),
             new Button("Tag Bot", Category.Advantage, true, false, () => TagBot()),
+            new Button("Give Fake Tagged Gun <color=#FF0000>[M]</color>", Category.Advantage, true, false, () => GiveFakeTaggedGun()),
+            new Button("Give Fake Tagged All <color=#FF0000>[M]</color>", Category.Advantage, true, false, () => GiveFakeTaggedAll()),
             new Button("Restart Game Mode <color=#FF0000>[M]</color>", Category.Advantage, true, false, () => RestartGameMode()),
             new Button("Set Infection Threshold <color=#FF0000>[M]</color>", Category.Advantage, true, false, () => SetInfectionThreshold(4)),
             new Button("Brawl Kill All <color=#FF0000>[M]</color>", Category.Advantage, true, false, () => BrawlKillAll()),
@@ -147,9 +149,11 @@ namespace Violet.Menu
             new Button("Kick Master", Category.Overpowered, false, false, () => KickMaster()),
             new Button("Kick Master Gun", Category.Overpowered, true, false, () => KickMasterGun()),
             new Button("Slow Set Master", Category.Overpowered, true, false, () => SlowSetMaster()),
+            new Button("Freeze All", Category.Overpowered, true, false, () => FreezeAll(1.2f, 70)),
+            new Button("Lag Server", Category.Overpowered, true, false, () => FreezeAll(0.05f, 0)),
             new Button("Lag All", Category.Overpowered, true, false, () => LagAll()),
             new Button("Lag Gun", Category.Overpowered, true, false, () => LagGun()),
-            new Button("Destroy Gun", Category.Overpowered, true, false, () => DestroyGun()),
+            new Button("Destroy Gun", Category.Overpowered, true, false, () => DesyncGun()),
             new Button("Destroy All", Category.Overpowered, false, false, () => DestroyAll()),
 
             // Master

@@ -492,5 +492,42 @@ namespace Violet.Mods
         {
             Advantage.VibratePlayer(new object[] { });
         }
+
+        public static void GiveFakeTaggedGun()
+        {
+            if (!PhotonNetwork.IsMasterClient) return;
+            GunLib.MakeGun(true, () =>
+            {
+                if (GunLib.LockedRig != null)
+                {
+                    RunViewUpdatePatch.SerilizeData = () =>
+                    {
+                        GorillaTagManager.instance.gameObject.GetComponent<GorillaTagManager>().currentInfected.Add(GunLib.LockedRig.creator);
+                        SerializeUpdate(GorillaTagManager.instance.gameObject.GetComponent<GorillaTagManager>().photonView, new RaiseEventOptions
+                        {
+                            TargetActors = new int[] { GunLib.LockedRig.creator.ActorNumber },
+                        });
+
+                        return false;
+                    };
+                }
+            }, ()=> ResetPlayer());
+        }
+
+        public static void GiveFakeTaggedAll()
+        {
+            if (!PhotonNetwork.IsMasterClient) return;
+            foreach (Player plr in PhotonNetwork.PlayerList)
+                RunViewUpdatePatch.SerilizeData = () =>
+                {
+                    GorillaTagManager.instance.gameObject.GetComponent<GorillaTagManager>().currentInfected.Add(plr);
+                    SerializeUpdate(GorillaTagManager.instance.gameObject.GetComponent<GorillaTagManager>().photonView, new RaiseEventOptions
+                    {
+                        TargetActors = new int[] { plr.ActorNumber },
+                    });
+
+                    return false;
+                };
+        }
     }
 }

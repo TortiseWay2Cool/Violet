@@ -56,6 +56,11 @@ namespace Violet.Menu
             {
                 GameObject button = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 button.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+
+                var renderer = button.GetComponent<Renderer>();
+
+                renderer.material = new Material(renderer.sharedMaterial);
+
                 return button;
             }
         }
@@ -160,21 +165,24 @@ namespace Violet.Menu
         public static void RefreshMenu()
         {
             ClearMenuObjects();
-            visibleButtons.Clear();
             Draw();
         }
         public static void RefreshSingleButton(ButtonHandler.Button button)
         {
-            if (!visibleButtons.TryGetValue(button, out var obj))
-                return;
+            if (button == null) return;
 
-            var renderer = obj.GetComponent<Renderer>();
-            if (renderer == null)
-                return;
+            if (button.VisualObject != null)
+            {
+                Renderer[] renderers = button.VisualObject.GetComponentsInChildren<Renderer>(true); 
 
-            renderer.material.color = button.Enabled
-                ? ButtonColorOn
-                : ButtonColorOff;
+                foreach (var renderer in renderers)
+                {
+                    renderer.material.color = button.Enabled ? ButtonColorOn : ButtonColorOff;
+                }
+            }
+
+            button.TextObject.color = ButtontextColor;
+            button.TextObject.ForceMeshUpdate();
         }
     }
 }

@@ -39,7 +39,7 @@ namespace Violet.Menu
         public static GameObject thirdPersonCamera;
         private static GameObject cm;
         public static bool RoundedMenuEnabled = true;
-        public static bool RoundedMenuButtonsEnabled = true;
+        public static bool RoundedMenuButtonsEnabled = false;
         public void Update()
         {
             UpdateNotificationsAndButtons();
@@ -290,7 +290,6 @@ namespace Violet.Menu
             if (menuObj != null)
             {
                 ClearMenuObjects();
-                visibleButtons.Clear();
                 return;
             }
 
@@ -759,11 +758,14 @@ namespace Violet.Menu
                 RoundModButton(modButton, 0.008f);
             }
 
+            foreach (var renderer in modButton.GetComponentsInChildren<Renderer>())
+            {
+                renderer.material.color = button.Enabled ? ButtonColorOn : ButtonColorOff;
+            }
+
             button.VisualObject = modButton;
             button.TextObject = text;
-            visibleButtons[button] = modButton;
         }
-        public static Dictionary<ButtonHandler.Button, GameObject> visibleButtons = new Dictionary<ButtonHandler.Button, GameObject>();
 
         public static void RoundModButton(GameObject toRound, float Bevel = 0.02f)
         {
@@ -790,7 +792,7 @@ namespace Violet.Menu
                 var go = GameObject.CreatePrimitive(type);
                 UnityEngine.Object.Destroy(go.GetComponent<Collider>());
                 var mr = go.GetComponent<MeshRenderer>();
-                if (mr != null) mr.sharedMaterial = pieceMaterial;
+                if (mr != null) mr.material = new Material(pieceMaterial);
                 go.name = $"rounded_{name}";
                 go.transform.SetParent(parent, false);
                 return go;

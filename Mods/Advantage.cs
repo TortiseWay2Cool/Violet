@@ -343,7 +343,7 @@ namespace Violet.Mods
         {
             if (PhotonNetwork.IsMasterClient)
             {
-                foreach (VRRig vrrig in GorillaParent.instance.vrrigs)
+                foreach (VRRig vrrig in VRRigCache.ActiveRigs)
                 {
                     GorillaGameManager.instance.HitPlayer(vrrig.creator);
                 }
@@ -385,7 +385,7 @@ namespace Violet.Mods
             if (PhotonNetwork.IsMasterClient)
             {
                 GorillaPaintbrawlManager component = GorillaGameManager.instance.gameObject.GetComponent<GorillaPaintbrawlManager>();
-                foreach (VRRig vrrig in GorillaParent.instance.vrrigs)
+                foreach (VRRig vrrig in VRRigCache.ActiveRigs)
                 {
                     if (component.playerLives[vrrig.creator.ActorNumber] > 0)
                     {

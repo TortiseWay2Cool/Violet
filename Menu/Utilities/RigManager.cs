@@ -19,7 +19,7 @@ namespace Violet.Utilities
         }
         public static VRRig GetRandomVRRig(bool includeSelf)
         {
-            VRRig random = GorillaParent.instance.vrrigs[UnityEngine.Random.Range(0, GorillaParent.instance.vrrigs.Count - 1)];
+            VRRig random =VRRigCache.ActiveRigs[UnityEngine.Random.Range(0,VRRigCache.ActiveRigs.Count - 1)];
             if (includeSelf)
             {
                 return random;
@@ -105,7 +105,7 @@ namespace Violet.Utilities
         {
             float num = float.MaxValue;
             VRRig outRig = null;
-            foreach (VRRig vrrig in GorillaParent.instance.vrrigs)
+            foreach (VRRig vrrig in VRRigCache.ActiveRigs)
             {
                 if (Vector3.Distance(GorillaTagger.Instance.bodyCollider.transform.position, vrrig.transform.position) < num)
                 {

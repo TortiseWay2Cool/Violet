@@ -146,13 +146,8 @@ namespace Violet.Menu
             new Button("Master", Category.Overpowered, false, false, () => ChangePage(Category.Master)),
             new Button("Scitzo Gun", Category.Overpowered, true, false, () => ScitzoGun(), ()=> ResetPlayer()),
             new Button("Reverse Scitzo Gun", Category.Overpowered, true, false, () => ReverseScitzoGun(), ()=> ResetPlayer()),
-            new Button("Kick Master", Category.Overpowered, false, false, () => KickMaster()),
-            new Button("Kick Master Gun", Category.Overpowered, true, false, () => KickMasterGun()),
-            new Button("Slow Set Master", Category.Overpowered, true, false, () => SlowSetMaster()),
             new Button("Freeze All", Category.Overpowered, true, false, () => FreezeAll(1.2f, 70)),
             new Button("Lag Server", Category.Overpowered, true, false, () => FreezeAll(0.05f, 0)),
-            new Button("Lag All", Category.Overpowered, true, false, () => LagAll()),
-            new Button("Lag Gun", Category.Overpowered, true, false, () => LagGun()),
             new Button("Destroy Gun", Category.Overpowered, true, false, () => DesyncGun()),
             new Button("Destroy All", Category.Overpowered, false, false, () => DestroyAll()),
 
